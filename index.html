@@ -21,9 +21,8 @@
   --bg-grad-3: #040a12;
   
   /* Cristal Realista */
-  --glass-bg: rgba(26, 26, 38, 0.35);
+  --glass-bg: rgba(26, 26, 38, 0.4);
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-glow: rgba(255, 255, 255, 0.15);
   --input-bg: rgba(0, 0, 0, 0.45);
   
   --text: #ffffff;
@@ -59,9 +58,11 @@
 html {
   background-color: var(--bg-grad-1);
   overscroll-behavior-y: none; /* Bloquea el fondo negro nativo de safari */
+  height: 100%;
 }
 
 body {
+  margin: 0; padding: 0;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
   min-height: 100dvh;
@@ -79,9 +80,9 @@ body {
 
 .syne-font { font-family: 'Syne', sans-serif; }
 
-/* ── Fondo Inmersivo a Pantalla Completa ── */
+/* ── Fondo Inmersivo (Cubre el Notch y la Barra de Tareas) ── */
 .bg-layer {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+  position: fixed; inset: 0; width: 100vw; height: 100dvh;
   background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3));
   background-size: 200% 200%;
   animation: bgDrift 15s ease-in-out infinite alternate;
@@ -93,7 +94,7 @@ body {
   100% { background-position: 100% 50%; }
 }
 
-/* ── Iluminación Ambiental (Orbes) ── */
+/* ── Iluminación Ambiental (Orbes GPU) ── */
 .bg-orb {
   position: absolute; border-radius: var(--radius-circle); filter: blur(80px);
   opacity: 0.35; pointer-events: none;
@@ -109,10 +110,10 @@ body {
   100% { transform: translate3d(25px, 35px, 0) scale(1.15); }
 }
 
-/* ── Contenedor de la Aplicación ── */
+/* ── Contenedor de la Aplicación (Respeta la zona segura) ── */
 .app-container { 
   position:relative; z-index:1; width:100%; max-width:480px; 
-  padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); 
+  padding: 16px; padding-top: max(20px, env(safe-area-inset-top)); 
   padding-bottom: 120px; 
 }
 
@@ -137,31 +138,36 @@ header {
 .date-badge {
   font-size:12px; font-weight:800; color:var(--text);
   background: var(--glass-bg); border:1px solid var(--glass-border);
-  border-top: 1px solid var(--glass-glow);
+  border-top: 1px solid rgba(255,255,255,0.2);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-pill); padding:10px 16px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 
-/* ── PANELES DE CRISTAL ILUMINADO ── */
+/* ── PANELES DE CRISTAL (CON REFLEJO FIJO Y ANIMADO) ── */
 .glass-panel {
-  background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%), var(--glass-bg);
+  background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%), var(--glass-bg);
   backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--glass-border);
-  border-top: 1px solid rgba(255,255,255,0.25); 
-  border-left: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255,255,255,0.3); 
+  border-left: 1px solid rgba(255,255,255,0.15);
   border-radius: var(--radius-card);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.35), inset 0 2px 4px rgba(255,255,255,0.05);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.05);
   position: relative;
   overflow: hidden;
 }
+/* Reflejo de cristal estático superior izquierdo */
+.glass-panel::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 40%);
+  pointer-events: none; border-radius: inherit; z-index: 1;
+}
+/* Brillo dinámico viajero */
 .glass-panel::after {
-  content: '';
-  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
   background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
-  transform: skewX(-20deg);
-  animation: shine 7s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
-  pointer-events: none;
+  transform: skewX(-20deg); animation: shine 7s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+  pointer-events: none; z-index: 2;
 }
 @keyframes shine {
   0% { left: -100%; opacity: 0; }
@@ -169,43 +175,69 @@ header {
   100% { left: 200%; opacity: 0; }
 }
 
-/* ── EXPANSIÓN IN-PLACE (ANIMACIÓN INCREÍBLE) ── */
-.clickable-text { cursor: pointer; transition: opacity 0.2s; }
-.clickable-text:active { opacity: 0.5; }
+/* ── EXPANSIÓN IN-PLACE MEJORADA (LA MAGIA) ── */
+.clickable-text { cursor: pointer; }
 
-/* Efecto cuando las Tarjetas (Arriba) se expanden */
-.card-value { transition: all 0.4s var(--spring-bouncy); }
-.card-value.expanded-text {
-  white-space: normal !important;
-  word-break: break-all !important;
-  font-size: 20px !important; /* Reduce su tamaño para encajar */
-  line-height: 1.2 !important;
-}
-
-/* Efecto cuando las listas del historial se expanden */
-.tx-item {
-  transition: all 0.4s var(--spring-bouncy);
-}
-.tx-item.expanded-item {
-  background: rgba(255,255,255,0.08) !important; /* Brillo cristalino de foco */
-  transform: scale(1.03); /* El Pop hacia adelante */
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 2px 10px rgba(255,255,255,0.15) !important;
+/* Animación y físicas para las Tarjetas Grandes */
+.card { transition: all 0.4s var(--spring-bouncy); will-change: transform, padding, z-index; z-index: 1; }
+.card.expanded-item {
+  transform: scale(1.05);
+  background: rgba(255,255,255,0.08); /* Se ilumina más al expandir */
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 2px 10px rgba(255,255,255,0.2);
   z-index: 10;
 }
-/* Magia: El texto de la izquierda ocupa todo el espacio */
-.expanded-item .tx-desc, 
-.expanded-item .clickable-text {
-  white-space: normal !important;
-  word-break: break-word !important;
+.card-value {
+  transition: all 0.4s var(--spring-bouncy);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: 40px; width: 100%;
 }
-/* Magia: El número de la derecha se hace pequeño */
+.card.expanded-item .card-value {
+  white-space: pre-wrap !important; /* Permite saltos de línea naturales */
+  overflow-wrap: break-word; /* Rompe solo si la palabra es gigante */
+  word-break: normal !important; /* CORRIGE EL ERROR DE LETRA POR LETRA */
+  font-size: 22px !important; /* Reduce el tamaño para que quepa */
+  max-height: 120px; /* Expande la caja */
+  line-height: 1.3;
+}
+
+/* Animación y físicas para las listas del historial */
+.tx-item {
+  transition: all 0.4s var(--spring-bouncy);
+  will-change: transform, padding, background-color;
+  transform-origin: center center;
+  z-index: 1;
+}
+.tx-item.expanded-item {
+  transform: scale(1.03); /* Efecto Pop */
+  padding: 24px 20px; /* Aumenta el aire interno */
+  background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)), var(--glass-bg);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 2px 10px rgba(255,255,255,0.15);
+  z-index: 10;
+}
+.expanded-item .tx-info {
+  flex: 1 1 100%; /* Toma todo el ancho posible */
+}
+.tx-desc {
+  transition: all 0.4s var(--spring-bouncy);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-height: 22px; /* Altura original */
+}
+.expanded-item .tx-desc {
+  white-space: pre-wrap !important; /* Habilita el wrap real */
+  word-break: normal !important; /* Sin letras huérfanas */
+  overflow-wrap: break-word;
+  max-height: 200px; /* Despliega todo el contenido */
+  font-size: 18px; /* Crece para leerse mejor */
+  margin-top: 4px;
+}
+/* Lo que está al lado (Monto) se achica */
+.tx-right, .tx-icon { transition: all 0.4s var(--spring-bouncy); }
 .expanded-item .tx-right {
-  transform: scale(0.65); /* Se encoje a un 65% */
-  transform-origin: right center;
+  transform: scale(0.7); /* Se hace un 30% más pequeño */
+  transform-origin: top right;
   opacity: 0.6;
 }
 .expanded-item .tx-icon {
-  transform: scale(0.85); /* El icono también se encoje un poco */
+  transform: scale(0.8);
   opacity: 0.8;
 }
 
@@ -262,17 +294,16 @@ header {
 .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
 
 .card {
-  padding: 24px 18px; transition: transform 0.2s var(--press-effect), box-shadow 0.2s;
+  padding: 24px 18px; 
   display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
 }
-.card:active { transform: scale(0.96); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 .card.wide { grid-column:1/-1; align-items: flex-start; text-align: left; }
 
 .card-label { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; width:100%;}
-.card-value { font-size:26px; font-weight:800; letter-spacing:-0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;}
 .card.wide .card-value { font-size:36px; }
 .card-sub { font-size:12px; color:var(--text-muted); margin-top:8px; font-weight:700;}
 
+/* Glows específicos */
 .card.income  { box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 -4px 20px -12px var(--green); } .card.income .card-value { color:var(--green); text-shadow: 0 0 15px rgba(0,229,160,0.3); }
 .card.expense { box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 -4px 20px -12px var(--red); }   .card.expense .card-value { color:var(--red); text-shadow: 0 0 15px rgba(255,79,106,0.3); }
 .card.spendable{box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 -4px 20px -12px var(--blue);} .card.spendable .card-value { color:var(--blue); }
@@ -283,7 +314,7 @@ header {
 .savings-bar-wrap { margin-top:16px; width:100%; background: rgba(0,0,0,0.6); border-radius:var(--radius-pill); height:8px; overflow:hidden; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
 .savings-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:var(--radius-pill); transition:width 1s var(--spring-smooth); width:0%; box-shadow: 0 0 10px rgba(0,229,160,0.6);}
 
-/* ── FORMULARIOS Y ALINEACIÓN ── */
+/* ── FORMULARIOS ── */
 .form-section { padding: 26px 24px; margin-bottom:24px; }
 .form-title { font-size:18px; font-weight:800; margin-bottom:24px; display:flex; align-items:center; gap:10px; letter-spacing:-0.5px;}
 
@@ -380,24 +411,22 @@ input::placeholder { color: rgba(255,255,255,0.25); font-weight:600; font-family
 .tx-item {
   padding: 18px 22px; display: flex; align-items: center; gap: 16px;
   animation: slideInCascade 0.5s var(--spring-smooth) both;
-  transition: all 0.4s var(--spring-bouncy);
 }
-.tx-icon, .tx-right, .tx-delete { transition: all 0.4s var(--spring-bouncy); }
 
-.tx-icon { width:50px; height:50px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; font-weight: 800; }
+.tx-icon { width:50px; height:50px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; font-weight: 800; z-index: 2;}
 .tx-icon.income  { background:var(--green-dim); color:var(--green); box-shadow: 0 0 20px rgba(0,229,160,0.2); }
 .tx-icon.expense { background:var(--red-dim); color:var(--red); box-shadow: 0 0 20px rgba(255,79,106,0.2); }
 .tx-icon.buy     { background:var(--blue-dim); color:var(--blue); box-shadow: 0 0 20px rgba(91,143,255,0.2); }
 
-.tx-info { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center;}
-.tx-desc { font-size:16px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.2px; color:var(--text); transition:all 0.3s;}
+.tx-info { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; z-index: 2;}
+.tx-desc { font-size:16px; font-weight:800; letter-spacing:-0.2px; color:var(--text);}
 .tx-date { font-size:12px; font-weight:600; color:var(--text-muted); margin-top:4px; }
-.tx-right { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; flex-shrink:0; gap:4px; }
+.tx-right { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; flex-shrink:0; gap:4px; z-index: 2;}
 .tx-amount { font-size:18px; font-weight:800; letter-spacing:-0.5px;}
 .tx-amount.income  { color:var(--green); }
 .tx-amount.expense { color:var(--red); }
 .tx-original { font-size:11px; font-weight:800; color:var(--gold); }
-.tx-delete { background:rgba(255,255,255,0.1); border:none; color:var(--text-muted); cursor:pointer; width:38px; height:38px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.tx-delete { background:rgba(255,255,255,0.1); border:none; color:var(--text-muted); cursor:pointer; width:38px; height:38px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:16px; transition:all 0.3s var(--press-effect); flex-shrink:0; z-index: 2;}
 .tx-delete:active { transform:scale(0.8); background:var(--red); color:#fff; box-shadow: 0 4px 15px rgba(255,79,106,0.4); }
 
 /* ── FILTROS PILLS ── */
@@ -464,6 +493,7 @@ canvas { width: 100% !important; max-height: 260px; }
 </style>
 </head>
 <body>
+
 <div class="bg-layer"></div>
 
 <div class="bg-orb orb-1"></div>
@@ -482,21 +512,21 @@ canvas { width: 100% !important; max-height: 260px; }
 
   <div class="page active" id="pageFin">
     <div class="summary-grid">
-      <div class="card glass-panel income">
+      <div class="card glass-panel income clickable-text" onclick="toggleExpand(this)">
         <div class="card-label">Ingresos</div>
-        <div class="card-value syne-font sensitive clickable-text" id="totalIncome" onclick="toggleExpand(this)">$ 0</div>
+        <div class="card-value syne-font sensitive" id="totalIncome">$ 0</div>
       </div>
-      <div class="card glass-panel expense">
+      <div class="card glass-panel expense clickable-text" onclick="toggleExpand(this)">
         <div class="card-label">Egresos</div>
-        <div class="card-value syne-font sensitive clickable-text" id="totalExpense" onclick="toggleExpand(this)">$ 0</div>
+        <div class="card-value syne-font sensitive" id="totalExpense">$ 0</div>
       </div>
-      <div class="card glass-panel spendable wide">
+      <div class="card glass-panel spendable wide clickable-text" onclick="toggleExpand(this)">
         <div class="card-label">Líquido para Gastar (60%)</div>
-        <div class="card-value syne-font sensitive clickable-text" id="spendable" onclick="toggleExpand(this)">$ 0</div>
+        <div class="card-value syne-font sensitive" id="spendable">$ 0</div>
       </div>
-      <div class="card glass-panel savings wide">
+      <div class="card glass-panel savings wide clickable-text" onclick="toggleExpand(this)">
         <div class="card-label">Fondo de Ahorro (40%)</div>
-        <div class="card-value syne-font sensitive clickable-text" id="savings" onclick="toggleExpand(this)">$ 0</div>
+        <div class="card-value syne-font sensitive" id="savings">$ 0</div>
         <div class="savings-bar-wrap"><div class="savings-bar" id="savingsBar"></div></div>
         <div class="card-sub sensitive" id="savingsPercent" style="text-align:right; margin-top:6px; font-weight:800;">0%</div>
       </div>
@@ -545,9 +575,9 @@ canvas { width: 100% !important; max-height: 260px; }
 
   <div class="page" id="pageLent">
     <div class="summary-grid">
-      <div class="card glass-panel lent wide">
+      <div class="card glass-panel lent wide clickable-text" onclick="toggleExpand(this)">
         <div class="card-label">En la calle (Préstamos)</div>
-        <div class="card-value syne-font sensitive clickable-text" id="totalLent" onclick="toggleExpand(this)">$ 0</div>
+        <div class="card-value syne-font sensitive" id="totalLent">$ 0</div>
         <div class="card-sub" id="lentPendingCount">0 pendientes</div>
       </div>
     </div>
@@ -583,9 +613,9 @@ canvas { width: 100% !important; max-height: 260px; }
 
   <div class="page" id="pageOwed">
     <div class="summary-grid">
-      <div class="card glass-panel owed wide">
+      <div class="card glass-panel owed wide clickable-text" onclick="toggleExpand(this)">
         <div class="card-label">Cuentas por Cobrar (Me deben)</div>
-        <div class="card-value syne-font sensitive clickable-text" id="totalOwed" onclick="toggleExpand(this)">$ 0</div>
+        <div class="card-value syne-font sensitive" id="totalOwed">$ 0</div>
         <div class="card-sub" id="owedPendingCount">0 pendientes</div>
       </div>
     </div>
@@ -620,9 +650,9 @@ canvas { width: 100% !important; max-height: 260px; }
   </div>
 
   <div class="page" id="pageBuy">
-    <div class="card glass-panel spendable wide" style="margin-bottom:24px;">
+    <div class="card glass-panel spendable wide clickable-text" onclick="toggleExpand(this)" style="margin-bottom:24px;">
       <div class="card-label">Saldo Líquido Actual</div>
-      <div class="card-value syne-font sensitive clickable-text" id="buyCurrentBalance" onclick="toggleExpand(this)">$ 0</div>
+      <div class="card-value syne-font sensitive" id="buyCurrentBalance">$ 0</div>
     </div>
     <div class="form-section glass-panel">
       <div class="form-title syne-font">🛒 Añadir Meta de Compra</div>
@@ -653,35 +683,35 @@ canvas { width: 100% !important; max-height: 260px; }
   <div class="page" id="pageGraph">
     <div class="chart-container glass-panel">
       <div class="chart-title syne-font">Flujo de Caja</div>
-      <canvas id="barChart"></canvas>
+      <canvas id="barChart" class="sensitive"></canvas>
     </div>
     <div class="chart-container glass-panel">
       <div class="chart-title syne-font">Distribución de Activos</div>
-      <canvas id="doughnutChart"></canvas>
+      <canvas id="doughnutChart" class="sensitive"></canvas>
     </div>
   </div>
 
   <div class="page" id="pageCalc">
-    <div class="card glass-panel wide" style="margin-bottom:24px; border-top:2px solid var(--teal);">
+    <div class="card glass-panel wide clickable-text" style="margin-bottom:24px; border-top:2px solid var(--teal);" onclick="toggleExpand(this)">
       <div class="card-label" style="color:var(--text);">Patrimonio Neto Proyectado</div>
-      <div class="card-value syne-font sensitive clickable-text" id="calcTotal" style="color:var(--teal); text-shadow:0 0 25px rgba(0,212,255,0.4);" onclick="toggleExpand(this)">$ 0</div>
+      <div class="card-value syne-font sensitive" id="calcTotal" style="color:var(--teal); text-shadow:0 0 25px rgba(0,212,255,0.4);">$ 0</div>
       <div class="card-sub">Si te pagan todas tus deudas hoy</div>
     </div>
     <div class="tx-list">
-      <div class="tx-item glass-panel" style="padding:26px 22px;">
+      <div class="tx-item glass-panel clickable-text" style="padding:26px 22px;" onclick="toggleExpand(this)">
         <div class="tx-icon" style="background:var(--blue-dim); color:var(--blue);">💰</div>
         <div class="tx-info"><div class="tx-desc">Saldo en mano</div></div>
-        <div class="tx-amount syne-font sensitive clickable-text" id="calcBalance" style="color:var(--text);" onclick="toggleExpand(this)">$ 0</div>
+        <div class="tx-right"><div class="tx-amount syne-font sensitive" id="calcBalance" style="color:var(--text);">$ 0</div></div>
       </div>
-      <div class="tx-item glass-panel" style="padding:26px 22px;">
+      <div class="tx-item glass-panel clickable-text" style="padding:26px 22px;" onclick="toggleExpand(this)">
         <div class="tx-icon" style="background:var(--orange-dim); color:var(--orange);">📤</div>
         <div class="tx-info"><div class="tx-desc">Préstamos emitidos</div></div>
-        <div class="tx-amount syne-font sensitive clickable-text" id="calcLent" style="color:var(--orange);" onclick="toggleExpand(this)">$ 0</div>
+        <div class="tx-right"><div class="tx-amount syne-font sensitive" id="calcLent" style="color:var(--orange);">$ 0</div></div>
       </div>
-      <div class="tx-item glass-panel" style="padding:26px 22px;">
+      <div class="tx-item glass-panel clickable-text" style="padding:26px 22px;" onclick="toggleExpand(this)">
         <div class="tx-icon" style="background:var(--purple-dim); color:var(--purple);">📥</div>
         <div class="tx-info"><div class="tx-desc">Cuentas por cobrar</div></div>
-        <div class="tx-amount syne-font sensitive clickable-text" id="calcOwed" style="color:var(--purple);" onclick="toggleExpand(this)">$ 0</div>
+        <div class="tx-right"><div class="tx-amount syne-font sensitive" id="calcOwed" style="color:var(--purple);">$ 0</div></div>
       </div>
     </div>
 
@@ -769,7 +799,7 @@ const dateOpts = { weekday:'long', day:'numeric', month:'short' };
 let today = new Date().toLocaleDateString('es-CO', dateOpts);
 document.getElementById('dateDisplay').textContent = today.charAt(0).toUpperCase() + today.slice(1);
 
-// ── Modo Privacidad 👁️ ──
+// ── MODO PRIVACIDAD 👁️ ──
 function togglePrivacy() {
   isPrivacy = !isPrivacy;
   const btn = document.getElementById('privacyBtn');
@@ -778,6 +808,9 @@ function togglePrivacy() {
     btn.textContent = '🙈';
     btn.style.background = 'var(--blue)';
     btn.style.borderColor = 'var(--blue)';
+    
+    // Contrae todos los elementos si entra en privacidad
+    document.querySelectorAll('.expanded-item').forEach(el => el.classList.remove('expanded-item'));
   } else {
     document.body.classList.remove('privacy-mode');
     btn.textContent = '👁️';
@@ -786,20 +819,20 @@ function togglePrivacy() {
   }
 }
 
-// ── EXPANSIÓN EN EL LUGAR (LA MAGIA VISUAL) ──
+// ── EXPANSIÓN IN-PLACE (LA MAGIA VISUAL) ──
 function toggleExpand(element) {
-  if(isPrivacy) return; // No se expande si hay privacidad
+  if(isPrivacy) return; // Bloquea si la privacidad está encendida
   
-  // Si es el valor principal de una tarjeta grande
-  if (element.classList.contains('card-value') || element.id === 'calcBalance' || element.id === 'calcLent' || element.id === 'calcOwed') {
-    element.classList.toggle('expanded-text');
-    return;
-  }
+  // Identifica si clickeó una Tarjeta de Arriba o un item de Lista
+  const container = element.closest('.card') || element.closest('.tx-item');
   
-  // Si es un ítem de la lista del historial
-  const txItem = element.closest('.tx-item');
-  if (txItem) {
-    txItem.classList.toggle('expanded-item');
+  if (container) {
+    // Si abre uno nuevo, cierra los demás para mantener orden
+    document.querySelectorAll('.expanded-item').forEach(el => {
+      if(el !== container) el.classList.remove('expanded-item');
+    });
+    // Activa la clase mágica que cambia el CSS
+    container.classList.toggle('expanded-item');
   }
 }
 
@@ -830,7 +863,7 @@ function showPage(page, tabElement) {
   document.querySelectorAll('.page').forEach(p => {
     p.classList.remove('active');
     if (p.id === 'page' + page.charAt(0).toUpperCase() + page.slice(1)) {
-      void p.offsetWidth; // Force reflow para reiniciar animación
+      void p.offsetWidth;
       p.classList.add('active');
     }
   });
@@ -865,7 +898,6 @@ function toggleCalc() {
 
 // ── Utilidades ──
 function fmtCOP(n) { return Math.round(Math.abs(n)).toLocaleString('es-CO'); }
-// Espacio no separable (\u00A0) para que el signo de dólar NUNCA se separe del número
 function fmt(n) { return (n < 0 ? '- ' : '') + '$\u00A0' + fmtCOP(Math.abs(n)); } 
 function parseAmount(str) { return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0; }
 function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1001,14 +1033,14 @@ function render(){
   if(!transactions.length) { list.innerHTML='<div style="text-align:center; color:var(--text-muted); padding:32px; font-weight:800;">No hay movimientos aún</div>'; }
   else {
     list.innerHTML = transactions.map((t,i)=>`
-      <div class="tx-item glass-panel" style="animation-delay:${i*0.04}s">
+      <div class="tx-item glass-panel clickable-text" style="animation-delay:${i*0.04}s" onclick="toggleExpand(this)">
         <div class="tx-icon ${t.type}">${t.type==='income'?'↑':'↓'}</div>
-        <div class="tx-info"><div class="tx-desc clickable-text" onclick="toggleExpand(this)">${escapeHtml(t.reason)}</div><div class="tx-date">${t.date}</div></div>
+        <div class="tx-info"><div class="tx-desc">${escapeHtml(t.reason)}</div><div class="tx-date">${t.date}</div></div>
         <div class="tx-right">
-          <div class="tx-amount syne-font ${t.type} sensitive clickable-text" onclick="toggleExpand(this)">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
+          <div class="tx-amount syne-font ${t.type} sensitive">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
           ${t.original?`<div class="tx-original syne-font sensitive">${t.original}</div>`:''}
         </div>
-        <button class="tx-delete" onclick="deleteTransaction(${t.id})">✕</button>
+        <button class="tx-delete" onclick="event.stopPropagation(); deleteTransaction(${t.id})">✕</button>
       </div>`).join('');
   }
 }
@@ -1023,18 +1055,18 @@ function renderLoans(){
     const list = document.getElementById(t+'List');
     if(!filtered.length) list.innerHTML='<div style="text-align:center; color:var(--text-muted); padding:32px; font-weight:800;">Lista limpia</div>';
     else list.innerHTML = filtered.map((l,i)=>`
-      <div class="tx-item glass-panel" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch; opacity:${l.paid?'0.5':'1'};">
+      <div class="tx-item glass-panel clickable-text" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch; opacity:${l.paid?'0.5':'1'};" onclick="toggleExpand(this)">
         <div style="display:flex; align-items:center; gap:16px;">
           <div class="tx-icon ${t}">${l.person.substring(0,2).toUpperCase()}</div>
-          <div class="tx-info"><div class="clickable-text" style="font-size:16px; font-weight:800; letter-spacing:-0.3px;" onclick="toggleExpand(this)">${escapeHtml(l.person)}</div><div class="tx-date">${l.date}</div></div>
+          <div class="tx-info"><div class="tx-desc">${escapeHtml(l.person)}</div><div class="tx-date">${l.date}</div></div>
           <div class="tx-right">
-            <div class="tx-amount syne-font ${t} sensitive clickable-text" style="${l.paid?'text-decoration:line-through;':''}" onclick="toggleExpand(this)">${fmt(l.amount)}</div>
+            <div class="tx-amount syne-font ${t} sensitive" style="${l.paid?'text-decoration:line-through;':''}">${fmt(l.amount)}</div>
             ${l.original?`<div class="tx-original syne-font sensitive">${l.original}</div>`:''}
           </div>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
-          <button style="font-size:12px; font-weight:800; padding:12px 20px; border-radius:var(--radius-pill); border:none; cursor:pointer; background:${l.paid?'rgba(255,255,255,0.15)':t==='lent'?'var(--orange)':'var(--purple)'}; color:${l.paid?'var(--text)':'#000'}; transition:all 0.3s var(--press-effect);" onclick="togglePaid(${l.id})">${l.paid?'Revertir':'Pagado ✓'}</button>
-          <button class="tx-delete" onclick="deleteLoan(${l.id})">✕</button>
+          <button style="font-size:12px; font-weight:800; padding:12px 20px; border-radius:var(--radius-pill); border:none; cursor:pointer; background:${l.paid?'rgba(255,255,255,0.15)':t==='lent'?'var(--orange)':'var(--purple)'}; color:${l.paid?'var(--text)':'#000'}; transition:all 0.3s var(--press-effect);" onclick="event.stopPropagation(); togglePaid(${l.id})">${l.paid?'Revertir':'Pagado ✓'}</button>
+          <button class="tx-delete" onclick="event.stopPropagation(); deleteLoan(${l.id})">✕</button>
         </div>
       </div>`).join('');
   });
@@ -1047,15 +1079,15 @@ function renderWishlist(){
   if(!wishlist.length) container.innerHTML='<div style="text-align:center; color:var(--text-muted); padding:32px; font-weight:800;">No tienes metas añadidas</div>';
   else container.innerHTML = wishlist.map((item,i)=>{
     const rem = bal - item.amount; const c = rem>=0?'var(--green)':'var(--red)';
-    return `<div class="tx-item glass-panel" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch;">
+    return `<div class="tx-item glass-panel clickable-text" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch;" onclick="toggleExpand(this)">
       <div style="display:flex; align-items:center; gap:16px; margin-bottom:14px;">
         <div class="tx-icon buy">🛍️</div>
-        <div class="tx-info"><div class="tx-desc clickable-text" onclick="toggleExpand(this)">${escapeHtml(item.name)}</div></div>
+        <div class="tx-info"><div class="tx-desc">${escapeHtml(item.name)}</div></div>
         <div class="tx-right">
-          <div class="tx-amount syne-font sensitive clickable-text" style="color:#fff;" onclick="toggleExpand(this)">${fmt(item.amount)}</div>
+          <div class="tx-amount syne-font sensitive" style="color:#fff;">${fmt(item.amount)}</div>
           ${item.original?`<div class="tx-original syne-font sensitive">${item.original}</div>`:''}
         </div>
-        <button class="tx-delete" onclick="deleteWishlistItem(${item.id})">✕</button>
+        <button class="tx-delete" onclick="event.stopPropagation(); deleteWishlistItem(${item.id})">✕</button>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:13px; padding-top:16px; border-top:1px solid var(--glass-border);">
         <span style="color:var(--text-muted); font-weight:800;">Te quedaría en cuenta:</span><span class="syne-font sensitive" style="font-weight:800; font-size:16px; color:${c}">${fmt(rem)}</span>
