@@ -15,10 +15,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
-  /* Fondo Oscuro Base */
-  --bg-grad-1: #08080f;
-  --bg-grad-2: #120d1c;
-  --bg-grad-3: #040a12;
+  /* Fondo Oscuro */
+  --bg-color: #08080f;
   
   /* Cristal Realista */
   --glass-bg: rgba(26, 26, 38, 0.4);
@@ -29,94 +27,70 @@
   --text-muted: #9aa0a6;
   
   --green: #00e5a0;
-  --green-dim: rgba(0,229,160,0.15);
   --red: #ff4f6a;
-  --red-dim: rgba(255,79,106,0.15);
   --gold: #f5c542;
   --blue: #5b8fff;
-  --blue-dim: rgba(91,143,255,0.15);
   --purple: #b57bff;
   --orange: #ff9c40;
   --teal: #00d4ff;
-  --magenta: #ff2a85;
   
   --radius-card: 32px;
   --radius-pill: 50px;
   --radius-circle: 50%;
   
-  /* Físicas de Apple UI */
   --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1.15);
-  --spring-smooth: cubic-bezier(0.25, 1, 0.5, 1);
   --press-effect: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* ── REGLAS ESTRICTAS CONTRA DESBORDAMIENTO (FIX SCROLL LATERAL) ── */
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
 html {
-  /* ESTO ELIMINA EL BORDE NEGRO SUPERIOR E INFERIOR EN IOS */
-  background-color: var(--bg-grad-1);
-  overscroll-behavior-y: none;
+  background-color: var(--bg-color); /* FIX BORDE NEGRO */
+  width: 100vw;
   height: 100%;
-  width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 body {
-  margin: 0; padding: 0;
-  background-color: var(--bg-grad-1);
+  background-color: var(--bg-color);
   color: var(--text);
-  /* Se usará DM Sans para todo lo legible y numérico */
   font-family: 'DM Sans', sans-serif;
   min-height: 100dvh;
-  overflow-x: hidden;
+  width: 100vw;
+  overflow-x: hidden; /* FIX MOVIMIENTO LATERAL */
   -webkit-font-smoothing: antialiased;
-  overscroll-behavior-y: none;
   display: flex;
   justify-content: center;
+  position: relative;
 }
-
-/* ── MODO PRIVACIDAD ── */
-.privacy-mode .sensitive { filter: blur(12px); opacity: 0.6; pointer-events: none; }
-.privacy-mode canvas { filter: blur(14px); opacity: 0.5; pointer-events: none; }
-.sensitive { transition: filter 0.4s ease, opacity 0.4s ease; }
 
 .syne-font { font-family: 'Syne', sans-serif; }
 
-/* ── Fondo Inmersivo (Cubre toda la pantalla) ── */
+/* ── Fondo Inmersivo (Cubre el Notch) ── */
 .bg-layer {
-  position: fixed; inset: -100px; /* Expande más allá de la pantalla para cubrir notches */
-  background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3));
-  background-size: 200% 200%;
-  animation: bgDrift 15s ease-in-out infinite alternate;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #08080f, #120d1c, #040a12);
   z-index: -2;
 }
 
-@keyframes bgDrift {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
-}
-
-/* ── Iluminación Ambiental (Orbes GPU) ── */
+/* ── Iluminación Ambiental FIJA (Evita que el scroll lateral reviente) ── */
 .bg-orb {
-  position: absolute; border-radius: var(--radius-circle); filter: blur(80px);
-  opacity: 0.35; pointer-events: none;
-  will-change: transform; 
-  animation: floatOrb 12s linear infinite alternate;
+  position: fixed; /* FIXED asegura que no expanda el tamaño de la página */
+  border-radius: var(--radius-circle); filter: blur(80px);
+  opacity: 0.3; pointer-events: none;
 }
 .orb-1 { top: -5%; left: -5%; width: 300px; height: 300px; background: var(--green); }
-.orb-2 { bottom: 15%; right: -5%; width: 320px; height: 320px; background: var(--blue); animation-delay: -5s; }
-.orb-3 { top: 40%; left: 30%; width: 280px; height: 280px; background: var(--purple); animation-delay: -9s; opacity: 0.2; }
+.orb-2 { bottom: 15%; right: -5%; width: 320px; height: 320px; background: var(--blue); }
 
-@keyframes floatOrb {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(20px, 30px, 0) scale(1.1); }
-}
-
-/* ── Contenedor de la Aplicación ── */
+/* ── Contenedor Principal (Respeta Notch y Dock) ── */
 .app-container { 
   position:relative; z-index:1; width:100%; max-width:480px; 
-  /* Empuja el contenido exactamente debajo de la barra del iPhone */
-  padding: 16px; padding-top: max(25px, env(safe-area-inset-top)); 
-  padding-bottom: 140px; 
+  padding: 16px; 
+  padding-top: max(20px, env(safe-area-inset-top)); /* FIX BORDE NEGRO: Empuja contenido bajo cámara */
+  padding-bottom: 120px; 
+  overflow-x: hidden;
 }
 
 header {
@@ -125,24 +99,12 @@ header {
 }
 .logo { font-weight:800; font-size:26px; letter-spacing:-0.5px; text-shadow: 0 4px 16px rgba(0,0,0,0.6); }
 .logo span { color:var(--green); }
-.header-actions { display:flex; align-items:center; gap:10px; }
-
-.privacy-btn {
-  background: var(--glass-bg); border:1px solid var(--glass-border);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  width: 44px; height: 44px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; cursor: pointer; transition: all 0.3s var(--press-effect);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-}
-.privacy-btn:active { transform: scale(0.85); }
 
 .date-badge {
-  font-size:13px; font-weight:800; color:var(--text);
+  font-size:12px; font-weight:800; color:var(--text);
   background: var(--glass-bg); border:1px solid var(--glass-border);
-  border-top: 1px solid rgba(255,255,255,0.2);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-radius: var(--radius-pill); padding:10px 18px;
+  border-radius: var(--radius-pill); padding:10px 16px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 
@@ -151,68 +113,12 @@ header {
   background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%), var(--glass-bg);
   backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--glass-border);
-  border-top: 1px solid rgba(255,255,255,0.3); 
-  border-left: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.2); 
+  border-left: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--radius-card);
   box-shadow: 0 16px 40px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.05);
   position: relative;
   overflow: hidden;
-}
-.glass-panel::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 40%);
-  pointer-events: none; border-radius: inherit; z-index: 1;
-}
-
-/* ── EXPANSIÓN IN-PLACE LIMPIA (SIN CORTES) ── */
-.clickable-text { cursor: pointer; }
-
-/* Tarjetas Totales */
-.card { transition: background-color 0.3s ease; }
-.card.expanded-item {
-  background: rgba(255,255,255,0.1) !important;
-}
-.card-value {
-  font-family: 'DM Sans', sans-serif !important; /* Fuente limpia y legible */
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
-}
-.card.expanded-item .card-value {
-  white-space: normal !important; 
-  word-break: break-word !important; 
-  font-size: 26px !important; /* Ligeramente más pequeño para que quepa perfecto */
-  line-height: 1.2;
-}
-
-/* Listas Historial */
-.tx-item {
-  /* Solo animamos fondo para evitar que el layout "salte" y se rompa */
-  transition: background-color 0.3s ease, padding 0.3s ease;
-}
-.tx-item.expanded-item {
-  background: rgba(255,255,255,0.1) !important; 
-  padding: 24px 20px; /* Da aire alrededor del texto largo */
-}
-.tx-desc {
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.expanded-item .tx-desc, .expanded-item .tx-info .clickable-text {
-  white-space: normal !important; 
-  word-break: break-word !important;
-  font-size: 17px; 
-  line-height: 1.3;
-  margin-top: 4px;
-}
-/* Magia: El número de la derecha se achica y difumina suavemente */
-.tx-right { transition: transform 0.4s var(--spring-smooth), opacity 0.4s ease; }
-.expanded-item .tx-right {
-  transform: scale(0.75);
-  transform-origin: right center;
-  opacity: 0.4;
-}
-.tx-icon { transition: transform 0.4s var(--spring-smooth), opacity 0.4s ease; }
-.expanded-item .tx-icon {
-  transform: scale(0.8);
-  opacity: 0.6;
 }
 
 /* ── DOCK FLOTANTE ── */
@@ -222,10 +128,10 @@ header {
   padding: 0 12px; padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .nav-dock {
-  background: rgba(12, 12, 18, 0.85); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  background: rgba(12, 12, 18, 0.9); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
   border: 1px solid rgba(255,255,255,0.15); border-top: 1px solid rgba(255,255,255,0.3);
   border-radius: var(--radius-pill);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 2px 5px rgba(255,255,255,0.1);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
   display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px;
   width: 100%; max-width: 480px; padding: 6px;
 }
@@ -233,14 +139,12 @@ header {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 10px 0; border-radius: var(--radius-pill); background: transparent;
   color: var(--text-muted); cursor: pointer; 
-  transition: all 0.4s var(--spring-bouncy);
+  transition: all 0.3s var(--spring-bouncy);
 }
-.nav-tab:active { transform: scale(0.85) translate3d(0, 3px, 0); background: rgba(255,255,255,0.08);}
-.nav-tab .tab-icon { font-size: 20px; margin-bottom: 4px; transition: transform 0.4s var(--spring-bouncy); }
+.nav-tab:active { transform: scale(0.85); background: rgba(255,255,255,0.08);}
+.nav-tab .tab-icon { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s var(--spring-bouncy); }
 .nav-tab .tab-text { 
   font-size: 10px; font-weight: 800; letter-spacing: -0.2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 95%;
-  transition: color 0.3s;
 }
 .nav-tab.active { 
   background: #ffffff; color: #000000; 
@@ -252,13 +156,13 @@ header {
 
 /* ── ANIMACIÓN DE PÁGINAS ── */
 .page { display:none; opacity:0; }
-.page.active { display:block; animation: pageAppear 0.4s var(--spring-smooth) forwards; }
+.page.active { display:block; animation: pageAppear 0.4s ease-out forwards; }
 @keyframes pageAppear {
   0% { opacity: 0; transform: translate3d(0, 15px, 0); }
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
-/* ── TARJETAS DE FINANZAS ── */
+/* ── TARJETAS DE FINANZAS (FIX NÚMEROS INCOMPLETOS) ── */
 .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
 
 .card {
@@ -267,157 +171,161 @@ header {
 }
 .card.wide { grid-column:1/-1; align-items: flex-start; text-align: left; }
 
-.card-label { font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; width:100%;}
+.card-label { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; width:100%;}
+
+/* FIX CRÍTICO: Números flexibles, se acomodan solos y NUNCA muestran "..." */
 .card-value { 
-  /* FUENTE DE NÚMEROS MEJORADA Y MÁS GRANDE */
   font-family: 'DM Sans', sans-serif !important; 
-  font-size: 30px; font-weight: 800; letter-spacing: -1px; 
+  font-size: clamp(22px, 6vw, 30px); /* Tamaño dinámico inteligente */
+  font-weight: 800; 
+  letter-spacing: -1px; 
+  word-break: break-word; /* Permite saltar de línea si es gigante */
+  line-height: 1.1;
+  width: 100%;
 }
-.card.wide .card-value { font-size: 40px; }
+.card.wide .card-value { font-size: clamp(30px, 8vw, 42px); }
+
 .card-sub { font-size:13px; color:var(--text-muted); margin-top:8px; font-weight:700;}
 
-/* Glows específicos */
 .card.income  { box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 -4px 20px -12px var(--green); } .card.income .card-value { color:var(--green); }
 .card.expense { box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 -4px 20px -12px var(--red); }   .card.expense .card-value { color:var(--red); }
 .card.spendable{box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 -4px 20px -12px var(--blue);} .card.spendable .card-value { color:var(--blue); }
-.card.savings  { } .card.savings  .card-value { color:var(--gold); }
-.card.lent     { } .card.lent   .card-value { color:var(--orange); }
-.card.owed     { } .card.owed  .card-value { color:var(--purple); }
+.card.savings  .card-value { color:var(--gold); }
+.card.lent     .card-value { color:var(--orange); }
+.card.owed     .card-value { color:var(--purple); }
 
-.savings-bar-wrap { margin-top:16px; width:100%; background: rgba(0,0,0,0.6); border-radius:var(--radius-pill); height:8px; overflow:hidden; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
-.savings-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:var(--radius-pill); transition:width 1s var(--spring-smooth); width:0%; box-shadow: 0 0 10px rgba(0,229,160,0.6);}
+.savings-bar-wrap { margin-top:16px; width:100%; background: rgba(0,0,0,0.6); border-radius:var(--radius-pill); height:8px; overflow:hidden;}
+.savings-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:var(--radius-pill); transition:width 1s ease; width:0%; box-shadow: 0 0 10px rgba(0,229,160,0.6);}
 
 /* ── FORMULARIOS ── */
 .form-section { padding: 26px 24px; margin-bottom:24px; }
-.form-title { font-size:18px; font-weight:800; margin-bottom:24px; display:flex; align-items:center; gap:10px; letter-spacing:-0.5px;}
+.form-title { font-size:18px; font-weight:800; margin-bottom:24px; display:flex; align-items:center; gap:10px; }
 
 .type-toggle { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
 .type-btn {
   padding:16px; border-radius:var(--radius-pill); border:1px solid var(--glass-border);
-  background: var(--input-bg); color:var(--text-muted); font-size:15px; font-weight:800; 
+  background: var(--input-bg); color:var(--text-muted); font-size:14px; font-weight:800; 
   display:flex; align-items:center; justify-content:center; gap:8px;
-  cursor:pointer; transition:all 0.3s var(--press-effect); 
+  cursor:pointer; transition:all 0.2s var(--press-effect); 
 }
 .type-btn:active { transform:scale(0.92); }
-.type-btn.active-income  { background:var(--green-dim); border-color:var(--green); color:var(--green); box-shadow:0 8px 20px rgba(0,229,160,0.15);}
-.type-btn.active-expense { background:var(--red-dim); border-color:var(--red); color:var(--red); box-shadow:0 8px 20px rgba(255,79,106,0.15);}
+.type-btn.active-income  { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+.type-btn.active-expense { background:var(--red-dim); border-color:var(--red); color:var(--red); }
 
 .input-group { margin-bottom:18px; }
-.input-label { font-size:13px; font-weight:800; margin-left:14px; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; display:block; }
+.input-label { font-size:12px; font-weight:800; margin-left:14px; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; display:block; }
 
 .amount-row { 
   display:flex; align-items:stretch; gap:10px; 
   background: var(--input-bg); border:1px solid var(--glass-border); 
   border-radius:var(--radius-pill); padding:6px;
-  transition: all 0.3s;
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
 }
-.amount-row:focus-within { border-color:rgba(255,255,255,0.4); background: rgba(255,255,255,0.08); box-shadow: inset 0 4px 10px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.05); }
+.amount-row:focus-within { border-color:rgba(255,255,255,0.4); background: rgba(255,255,255,0.08); }
 
 .currency-toggle { display:flex; background:rgba(0,0,0,0.6); border-radius:var(--radius-pill); padding:2px; flex-shrink:0;}
 .cur-btn { 
   padding:12px 18px; background:none; border:none; border-radius:var(--radius-pill); 
-  color:var(--text-muted); font-size:14px; font-weight:800; 
-  cursor:pointer; transition:all 0.3s; display:flex; align-items:center; justify-content:center;
+  color:var(--text-muted); font-size:13px; font-weight:800; 
+  cursor:pointer; transition:all 0.2s;
 }
-.cur-btn.active { background:var(--gold); color:#000; box-shadow: 0 4px 12px rgba(245,197,66,0.4);}
+.cur-btn.active { background:var(--gold); color:#000; }
 
 .amount-input-wrap { display:flex; align-items:center; flex:1; padding: 0 16px; gap: 8px; }
-.amount-prefix { color:var(--text-muted); font-size:22px; font-weight:800; white-space:nowrap; padding-bottom: 2px; }
+.amount-prefix { color:var(--text-muted); font-size:20px; font-weight:800; white-space:nowrap; }
 input {
   flex:1; min-width:0; background: transparent; border:none; -webkit-appearance: none;
-  /* FUENTE GRANDE PARA INPUT */
-  color:var(--text); font-family: 'DM Sans', sans-serif !important; font-size:24px; font-weight:800; outline:none; padding:12px 0;
-  letter-spacing:-0.5px; margin:0; 
+  color:var(--text); font-family: 'DM Sans', sans-serif; font-size:22px; font-weight:800; outline:none; padding:12px 0;
 }
-input::placeholder { color: rgba(255,255,255,0.25); font-weight:600; font-size: 18px;}
+input::placeholder { color: rgba(255,255,255,0.25); font-size: 16px;}
 
 .standalone-input {
   background: var(--input-bg); border:1px solid var(--glass-border); border-radius:var(--radius-pill);
-  padding:18px 22px; font-size:16px; font-weight:700; width:100%; font-family:'DM Sans', sans-serif; letter-spacing:0;
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); transition: all 0.3s;
+  padding:18px 22px; font-size:16px; font-weight:700; width:100%; font-family:'DM Sans', sans-serif;
 }
-.standalone-input:focus { border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.08); box-shadow: inset 0 4px 10px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.05);}
+.standalone-input:focus { border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.08); }
 
-.conversion-preview { font-size:14px; font-weight:800; color:var(--text-muted); margin-top:8px; margin-left: 14px; min-height:20px; transition:all 0.3s; }
+.conversion-preview { font-size:13px; font-weight:800; color:var(--text-muted); margin-top:8px; margin-left: 14px; min-height:18px; }
 .conversion-preview.active { color:var(--gold); }
 
 /* Botón Principal */
 .add-btn {
   width:100%; padding:20px; border-radius:var(--radius-pill); border:none;
   font-size:16px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  cursor:pointer; transition:all 0.3s var(--press-effect); margin-top:16px;
-  position: relative; overflow: hidden;
+  cursor:pointer; transition:transform 0.2s var(--press-effect); margin-top:16px;
 }
 .add-btn:active { transform:scale(0.95) translate3d(0,2px,0); }
-.add-btn.btn-income  { background:var(--green);  color:#000; box-shadow: 0 12px 30px rgba(0,229,160,0.35); }
-.add-btn.btn-expense { background:var(--red);    color:#fff; box-shadow: 0 12px 30px rgba(255,79,106,0.35); }
-.add-btn.btn-lent    { background:var(--orange); color:#000; box-shadow: 0 12px 30px rgba(255,156,64,0.35); }
-.add-btn.btn-owed    { background:var(--purple); color:#000; box-shadow: 0 12px 30px rgba(181,123,255,0.35); }
-.add-btn.btn-buy     { background:var(--blue);   color:#fff; box-shadow: 0 12px 30px rgba(91,143,255,0.35); }
+.add-btn.btn-income  { background:var(--green);  color:#000; box-shadow: 0 8px 24px rgba(0,229,160,0.3); }
+.add-btn.btn-expense { background:var(--red);    color:#fff; box-shadow: 0 8px 24px rgba(255,79,106,0.3); }
+.add-btn.btn-lent    { background:var(--orange); color:#000; box-shadow: 0 8px 24px rgba(255,156,64,0.3); }
+.add-btn.btn-owed    { background:var(--purple); color:#000; box-shadow: 0 8px 24px rgba(181,123,255,0.3); }
+.add-btn.btn-buy     { background:var(--blue);   color:#fff; box-shadow: 0 8px 24px rgba(91,143,255,0.3); }
 
 /* ── TASA DE CAMBIO ── */
 .rate-section { padding: 16px 24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;}
-.rate-info { display:flex; flex-direction:column; gap:4px; }
 
-/* ── HISTORIAL Y LISTAS ── */
+/* ── HISTORIAL Y LISTAS (FIX TEXTOS Y MONTOS) ── */
 .history-header {
-  font-size:22px; font-weight:800; letter-spacing:-0.5px;
+  font-size:20px; font-weight:800; letter-spacing:-0.5px;
   color:var(--text); margin: 36px 0 20px; padding: 0 8px;
   display:flex; align-items:center; justify-content:space-between;
 }
 .clear-btn {
-  font-size:13px; font-weight:800; color:var(--text-muted); background:var(--glass-bg);
+  font-size:12px; font-weight:800; color:var(--text-muted); background:var(--glass-bg);
   border:1px solid var(--glass-border); border-radius:var(--radius-pill); padding:10px 18px;
-  cursor:pointer; transition:all 0.3s var(--press-effect); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:transform 0.2s var(--press-effect);
 }
-.clear-btn:active { transform: scale(0.9); background:var(--red-dim); color:var(--red); border-color:var(--red);}
+.clear-btn:active { transform: scale(0.9); }
 
 .tx-list { display:flex; flex-direction:column; gap:14px; }
 
 .tx-item {
-  padding: 18px 22px; display: flex; align-items: center; gap: 16px;
+  padding: 18px 20px; display: flex; align-items: center; gap: 14px;
 }
 
-.tx-icon { width:52px; height:52px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; font-weight: 800; z-index: 2;}
-.tx-icon.income  { background:var(--green-dim); color:var(--green); box-shadow: 0 0 20px rgba(0,229,160,0.2); }
-.tx-icon.expense { background:var(--red-dim); color:var(--red); box-shadow: 0 0 20px rgba(255,79,106,0.2); }
-.tx-icon.buy     { background:var(--blue-dim); color:var(--blue); box-shadow: 0 0 20px rgba(91,143,255,0.2); }
+.tx-icon { width:46px; height:46px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; font-weight: 800;}
+.tx-icon.income  { background:var(--green-dim); color:var(--green); }
+.tx-icon.expense { background:var(--red-dim); color:var(--red); }
+.tx-icon.buy     { background:var(--blue-dim); color:var(--blue); }
 
-.tx-info { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; z-index: 2;}
-.tx-desc { font-size:16px; font-weight:800; letter-spacing:-0.2px; color:var(--text);}
-.tx-date { font-size:13px; font-weight:600; color:var(--text-muted); margin-top:4px; }
-.tx-right { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; flex-shrink:0; gap:4px; z-index: 2;}
-/* FUENTE DE MONTOS EN LISTAS */
-.tx-amount { font-family: 'DM Sans', sans-serif !important; font-size:22px; font-weight:800; letter-spacing:-0.5px;}
+.tx-info { flex:1; min-width:0; display:flex; flex-direction:column;}
+.tx-desc { font-size:16px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text);}
+.tx-date { font-size:12px; font-weight:600; color:var(--text-muted); margin-top:4px; }
+
+.tx-right { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; flex-shrink:0; gap:4px; margin-right: 8px;}
+/* FIX CRÍTICO: Montos del historial flexibles y legibles */
+.tx-amount { 
+  font-family: 'DM Sans', sans-serif !important; 
+  font-size: 18px; font-weight: 800; 
+  word-break: break-word; /* Permite wrap */
+  text-align: right;
+}
 .tx-amount.income  { color:var(--green); }
 .tx-amount.expense { color:var(--red); }
-.tx-original { font-family: 'DM Sans', sans-serif !important; font-size:13px; font-weight:800; color:var(--gold); }
-.tx-delete { background:rgba(255,255,255,0.1); border:none; color:var(--text-muted); cursor:pointer; width:38px; height:38px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:16px; transition:all 0.3s var(--press-effect); flex-shrink:0; z-index: 2;}
-.tx-delete:active { transform:scale(0.8); background:var(--red); color:#fff; box-shadow: 0 4px 15px rgba(255,79,106,0.4); }
+.tx-original { font-family: 'DM Sans', sans-serif; font-size:12px; font-weight:800; color:var(--gold); }
+
+.tx-delete { background:rgba(255,255,255,0.1); border:none; color:var(--text-muted); cursor:pointer; width:36px; height:36px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.tx-delete:active { transform:scale(0.8); background:var(--red); color:#fff; }
 
 /* ── FILTROS PILLS ── */
 .filter-tabs { display:flex; gap:10px; margin-bottom:24px; }
 .filter-tab {
   flex:1; padding:14px; border-radius:var(--radius-pill); border:1px solid var(--glass-border);
   background:var(--input-bg); color:var(--text-muted); font-size:14px; font-weight:800; 
-  cursor:pointer; transition:all 0.3s var(--spring-bouncy); display:flex; align-items:center; justify-content:center;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+  cursor:pointer; transition:all 0.3s;
 }
-.filter-tab.active-all    { background:#fff; color:#000; border-color:#fff; box-shadow: 0 4px 15px rgba(255,255,255,0.25);}
-.filter-tab.active-pending{ background:var(--orange); color:#000; border-color:var(--orange); box-shadow: 0 4px 15px rgba(255,156,64,0.3);}
-.filter-tab.active-paid   { background:var(--green);  color:#000; border-color:var(--green); box-shadow: 0 4px 15px rgba(0,229,160,0.3);}
+.filter-tab.active-all    { background:#fff; color:#000; border-color:#fff;}
+.filter-tab.active-pending{ background:var(--orange); color:#000; border-color:var(--orange);}
+.filter-tab.active-paid   { background:var(--green);  color:#000; border-color:var(--green);}
 
 /* ── GRÁFICOS ── */
 .chart-container { padding: 26px; margin-bottom: 24px; }
-.chart-title { font-size:18px; font-weight:800; text-align:center; margin-bottom:24px; color:#fff; letter-spacing:-0.5px;}
+.chart-title { font-size:18px; font-weight:800; text-align:center; margin-bottom:24px; color:#fff;}
 canvas { width: 100% !important; max-height: 260px; }
 
 /* ── CALCULADORA DESPLEGABLE ── */
 .calc-wrapper {
   display: grid; grid-template-rows: 0fr;
-  transition: grid-template-rows 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+  transition: grid-template-rows 0.4s ease, opacity 0.3s ease;
   opacity: 0; margin-top: 0;
 }
 .calc-wrapper.open { grid-template-rows: 1fr; opacity: 1; margin-top: 20px; }
@@ -426,32 +334,28 @@ canvas { width: 100% !important; max-height: 260px; }
 .calc-display {
   background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border);
   border-radius: var(--radius-card); padding: 28px 32px; margin-bottom: 24px;
-  text-align: right; min-height: 130px; display: flex; flex-direction: column; justify-content: center;
-  box-shadow: inset 0 10px 30px rgba(0,0,0,0.6);
+  text-align: right; min-height: 120px; display: flex; flex-direction: column; justify-content: center;
 }
-.calc-screen { font-family: 'DM Sans', sans-serif !important; font-size: 58px; font-weight: 800; color: #fff; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; letter-spacing: -2px; line-height:1;}
-.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.calc-screen { font-family: 'DM Sans', sans-serif !important; font-size: 48px; font-weight: 800; color: #fff; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height:1;}
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .calc-btn {
   background: var(--glass-bg); border: 1px solid var(--glass-border);
   border-radius: var(--radius-circle); padding: 0; aspect-ratio: 1/1; 
-  color: #fff; font-size: 28px; font-weight: 800; font-family: 'DM Sans', sans-serif;
-  cursor: pointer; transition: all 0.2s var(--press-effect); display: flex; justify-content: center; align-items: center;
-  -webkit-appearance: none;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.05);
+  color: #fff; font-size: 26px; font-weight: 800;
+  cursor: pointer; transition: transform 0.2s var(--press-effect); display: flex; justify-content: center; align-items: center;
 }
-.calc-btn:active { transform: scale(0.85); background: rgba(255,255,255,0.15); box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+.calc-btn:active { transform: scale(0.85); background: rgba(255,255,255,0.15); }
 .calc-btn.op { color: var(--teal); background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.2); }
-.calc-btn.equal { background: var(--teal); color: #000; border-radius: var(--radius-pill); grid-column: span 2; aspect-ratio: auto; box-shadow: 0 8px 24px rgba(0,212,255,0.4); }
+.calc-btn.equal { background: var(--teal); color: #000; border-radius: var(--radius-pill); grid-column: span 2; aspect-ratio: auto; }
 .calc-btn.clear { color: var(--red); background: rgba(255,79,106,0.1); border-color: rgba(255,79,106,0.2);}
 
 /* ── TOAST ── */
 .toast {
-  position:fixed; top:20px; left:50%; transform:translate3d(-50%, -100px, 0) scale(0.9);
+  position:fixed; top:30px; left:50%; transform:translate3d(-50%, -100px, 0) scale(0.9);
   background:rgba(25,25,35,0.98); backdrop-filter:blur(30px); border:1px solid var(--glass-border);
-  border-radius:var(--radius-pill); padding:18px 32px; font-size:15px; font-weight:800;
+  border-radius:var(--radius-pill); padding:16px 30px; font-size:15px; font-weight:800;
   box-shadow:0 16px 40px rgba(0,0,0,0.7); z-index:9999; 
   transition:all 0.4s var(--spring-bouncy); white-space:nowrap; opacity:0;
-  display:flex; align-items:center; justify-content:center;
 }
 .toast.show { transform:translate3d(-50%, max(10px, env(safe-area-inset-top)), 0) scale(1); opacity:1; }
 .toast.green  { color:var(--green); border-bottom: 4px solid var(--green); }
@@ -463,49 +367,46 @@ canvas { width: 100% !important; max-height: 260px; }
 <body>
 
 <div class="bg-layer"></div>
-
 <div class="bg-orb orb-1"></div>
 <div class="bg-orb orb-2"></div>
-<div class="bg-orb orb-3"></div>
 
 <div class="app-container">
 
   <header>
     <div class="logo syne-font">Finanzas <span>Gabriel</span></div>
     <div class="header-actions">
-      <button class="privacy-btn" id="privacyBtn" onclick="togglePrivacy()">👁️</button>
       <div class="date-badge" id="dateDisplay"></div>
     </div>
   </header>
 
   <div class="page active" id="pageFin">
     <div class="summary-grid">
-      <div class="card glass-panel income clickable-text" onclick="toggleExpand(this)">
+      <div class="card glass-panel income">
         <div class="card-label">Ingresos</div>
-        <div class="card-value sensitive" id="totalIncome">$ 0</div>
+        <div class="card-value" id="totalIncome">$ 0</div>
       </div>
-      <div class="card glass-panel expense clickable-text" onclick="toggleExpand(this)">
+      <div class="card glass-panel expense">
         <div class="card-label">Egresos</div>
-        <div class="card-value sensitive" id="totalExpense">$ 0</div>
+        <div class="card-value" id="totalExpense">$ 0</div>
       </div>
-      <div class="card glass-panel spendable wide clickable-text" onclick="toggleExpand(this)">
+      <div class="card glass-panel spendable wide">
         <div class="card-label">Líquido para Gastar (60%)</div>
-        <div class="card-value sensitive" id="spendable">$ 0</div>
+        <div class="card-value" id="spendable">$ 0</div>
       </div>
-      <div class="card glass-panel savings wide clickable-text" onclick="toggleExpand(this)">
+      <div class="card glass-panel savings wide">
         <div class="card-label">Fondo de Ahorro (40%)</div>
-        <div class="card-value sensitive" id="savings">$ 0</div>
+        <div class="card-value" id="savings">$ 0</div>
         <div class="savings-bar-wrap"><div class="savings-bar" id="savingsBar"></div></div>
-        <div class="card-sub sensitive" id="savingsPercent" style="text-align:right; margin-top:6px; font-weight:800;">0%</div>
+        <div class="card-sub" id="savingsPercent" style="text-align:right; margin-top:6px; font-weight:800;">0%</div>
       </div>
     </div>
 
     <div class="rate-section glass-panel" id="rateSection" style="display:none;">
-      <div class="rate-info">
+      <div style="display:flex; flex-direction:column; gap:4px;">
         <div class="card-label" style="margin:0;">Tasa Cambio USD → COP</div>
-        <div class="conversion-preview" id="rateHint" style="margin:4px 0 0 0; font-size:14px; font-weight:800;">Obteniendo tasa en vivo...</div>
+        <div class="conversion-preview" id="rateHint" style="margin:4px 0 0 0; font-size:14px; font-weight:800;">Calculando...</div>
       </div>
-      <button onclick="fetchRate()" style="background:var(--input-bg); border:1px solid var(--glass-border); color:var(--text); width:44px; height:44px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s var(--press-effect); font-size:20px;">↻</button>
+      <button onclick="fetchRate()" style="background:var(--input-bg); border:1px solid var(--glass-border); color:var(--text); width:44px; height:44px; border-radius:var(--radius-circle); font-size:20px; border:none; cursor:pointer;">↻</button>
     </div>
 
     <div class="form-section glass-panel">
@@ -523,11 +424,11 @@ canvas { width: 100% !important; max-height: 260px; }
             <button class="cur-btn" id="curUSD" onclick="setCurrency('USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="amountPrefix">$</span>
+            <span class="amount-prefix syne-font" id="amountPrefix">$</span>
             <input type="text" id="amountInput" placeholder="0" inputmode="numeric" />
           </div>
         </div>
-        <div class="conversion-preview sensitive" id="conversionPreview"></div>
+        <div class="conversion-preview" id="conversionPreview"></div>
       </div>
       
       <div class="input-group">
@@ -543,9 +444,9 @@ canvas { width: 100% !important; max-height: 260px; }
 
   <div class="page" id="pageLent">
     <div class="summary-grid">
-      <div class="card glass-panel lent wide clickable-text" onclick="toggleExpand(this)">
+      <div class="card glass-panel lent wide">
         <div class="card-label">En la calle (Préstamos)</div>
-        <div class="card-value sensitive" id="totalLent">$ 0</div>
+        <div class="card-value" id="totalLent">$ 0</div>
         <div class="card-sub" id="lentPendingCount">0 pendientes</div>
       </div>
     </div>
@@ -563,11 +464,11 @@ canvas { width: 100% !important; max-height: 260px; }
             <button class="cur-btn" id="lentCurUSD" onclick="setLoanCurrency('lent','USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="lentAmountPrefix">$</span>
+            <span class="amount-prefix syne-font" id="lentAmountPrefix">$</span>
             <input type="text" id="lentAmount" placeholder="0" inputmode="numeric" />
           </div>
         </div>
-        <div class="conversion-preview sensitive" id="lentConvPreview"></div>
+        <div class="conversion-preview" id="lentConvPreview"></div>
       </div>
       <button class="add-btn btn-lent syne-font" onclick="addLoan('lent')">Registrar Préstamo</button>
     </div>
@@ -581,9 +482,9 @@ canvas { width: 100% !important; max-height: 260px; }
 
   <div class="page" id="pageOwed">
     <div class="summary-grid">
-      <div class="card glass-panel owed wide clickable-text" onclick="toggleExpand(this)">
+      <div class="card glass-panel owed wide">
         <div class="card-label">Cuentas por Cobrar (Me deben)</div>
-        <div class="card-value sensitive" id="totalOwed">$ 0</div>
+        <div class="card-value" id="totalOwed">$ 0</div>
         <div class="card-sub" id="owedPendingCount">0 pendientes</div>
       </div>
     </div>
@@ -601,11 +502,11 @@ canvas { width: 100% !important; max-height: 260px; }
             <button class="cur-btn" id="owedCurUSD" onclick="setLoanCurrency('owed','USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="owedAmountPrefix">$</span>
+            <span class="amount-prefix syne-font" id="owedAmountPrefix">$</span>
             <input type="text" id="owedAmount" placeholder="0" inputmode="numeric" />
           </div>
         </div>
-        <div class="conversion-preview sensitive" id="owedConvPreview"></div>
+        <div class="conversion-preview" id="owedConvPreview"></div>
       </div>
       <button class="add-btn btn-owed syne-font" onclick="addLoan('owed')">Registrar Deuda</button>
     </div>
@@ -618,9 +519,9 @@ canvas { width: 100% !important; max-height: 260px; }
   </div>
 
   <div class="page" id="pageBuy">
-    <div class="card glass-panel spendable wide clickable-text" onclick="toggleExpand(this)" style="margin-bottom:24px;">
+    <div class="card glass-panel spendable wide" style="margin-bottom:24px;">
       <div class="card-label">Saldo Líquido Actual</div>
-      <div class="card-value sensitive" id="buyCurrentBalance">$ 0</div>
+      <div class="card-value" id="buyCurrentBalance">$ 0</div>
     </div>
     <div class="form-section glass-panel">
       <div class="form-title syne-font">🛒 Añadir Meta de Compra</div>
@@ -636,11 +537,11 @@ canvas { width: 100% !important; max-height: 260px; }
             <button class="cur-btn" id="buyCurUSD" onclick="setBuyCurrency('USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="buyAmountPrefix">$</span>
+            <span class="amount-prefix syne-font" id="buyAmountPrefix">$</span>
             <input type="text" id="buyPrice" placeholder="0" inputmode="numeric" />
           </div>
         </div>
-        <div class="conversion-preview sensitive" id="buyConvPreview"></div>
+        <div class="conversion-preview" id="buyConvPreview"></div>
       </div>
       <button class="add-btn btn-buy syne-font" onclick="addWishlistItem()">Agregar Meta</button>
     </div>
@@ -651,35 +552,35 @@ canvas { width: 100% !important; max-height: 260px; }
   <div class="page" id="pageGraph">
     <div class="chart-container glass-panel">
       <div class="chart-title syne-font">Flujo de Caja</div>
-      <canvas id="barChart" class="sensitive"></canvas>
+      <canvas id="barChart"></canvas>
     </div>
     <div class="chart-container glass-panel">
       <div class="chart-title syne-font">Distribución de Activos</div>
-      <canvas id="doughnutChart" class="sensitive"></canvas>
+      <canvas id="doughnutChart"></canvas>
     </div>
   </div>
 
   <div class="page" id="pageCalc">
-    <div class="card glass-panel wide clickable-text" style="margin-bottom:24px; border-top:2px solid var(--teal);" onclick="toggleExpand(this)">
+    <div class="card glass-panel wide" style="margin-bottom:24px; border-top:2px solid var(--teal);">
       <div class="card-label" style="color:var(--text);">Patrimonio Neto Proyectado</div>
-      <div class="card-value sensitive" id="calcTotal" style="color:var(--teal); text-shadow:0 0 25px rgba(0,212,255,0.4);">$ 0</div>
+      <div class="card-value" id="calcTotal" style="color:var(--teal); text-shadow:0 0 25px rgba(0,212,255,0.4);">$ 0</div>
       <div class="card-sub">Si te pagan todas tus deudas hoy</div>
     </div>
     <div class="tx-list">
-      <div class="tx-item glass-panel clickable-text" style="padding:26px 22px;" onclick="toggleExpand(this)">
+      <div class="tx-item glass-panel" style="padding:22px 20px;">
         <div class="tx-icon" style="background:var(--blue-dim); color:var(--blue);">💰</div>
         <div class="tx-info"><div class="tx-desc">Saldo en mano</div></div>
-        <div class="tx-right"><div class="tx-amount sensitive" id="calcBalance" style="color:var(--text);">$ 0</div></div>
+        <div class="tx-right"><div class="tx-amount" id="calcBalance" style="color:var(--text);">$ 0</div></div>
       </div>
-      <div class="tx-item glass-panel clickable-text" style="padding:26px 22px;" onclick="toggleExpand(this)">
+      <div class="tx-item glass-panel" style="padding:22px 20px;">
         <div class="tx-icon" style="background:var(--orange-dim); color:var(--orange);">📤</div>
         <div class="tx-info"><div class="tx-desc">Préstamos emitidos</div></div>
-        <div class="tx-right"><div class="tx-amount sensitive" id="calcLent" style="color:var(--orange);">$ 0</div></div>
+        <div class="tx-right"><div class="tx-amount" id="calcLent" style="color:var(--orange);">$ 0</div></div>
       </div>
-      <div class="tx-item glass-panel clickable-text" style="padding:26px 22px;" onclick="toggleExpand(this)">
+      <div class="tx-item glass-panel" style="padding:22px 20px;">
         <div class="tx-icon" style="background:var(--purple-dim); color:var(--purple);">📥</div>
         <div class="tx-info"><div class="tx-desc">Cuentas por cobrar</div></div>
-        <div class="tx-right"><div class="tx-amount sensitive" id="calcOwed" style="color:var(--purple);">$ 0</div></div>
+        <div class="tx-right"><div class="tx-amount" id="calcOwed" style="color:var(--purple);">$ 0</div></div>
       </div>
     </div>
 
@@ -690,7 +591,7 @@ canvas { width: 100% !important; max-height: 260px; }
     <div id="calcWrapper" class="calc-wrapper">
       <div class="calc-inner">
         <div class="calc-display glass-panel">
-          <div class="calc-screen sensitive" id="mathScreen">0</div>
+          <div class="calc-screen" id="mathScreen">0</div>
         </div>
         <div class="calc-grid">
           <button class="calc-btn clear glass-panel" onclick="mathAction('C')">C</button>
@@ -753,7 +654,6 @@ canvas { width: 100% !important; max-height: 260px; }
 let currentType = 'income'; let currentCurrency = 'COP'; let lentCurrency = 'COP';
 let owedCurrency = 'COP'; let buyCurrency = 'COP'; let usdRate = null;
 let currentPage = 'fin'; let loanFilter = { lent: 'all', owed: 'all' };
-let isPrivacy = false;
 
 let transactions = JSON.parse(localStorage.getItem('fg_tx') || '[]');
 let loans        = JSON.parse(localStorage.getItem('fg_loans') || '[]');
@@ -766,70 +666,6 @@ Chart.defaults.color = '#9aa0a6'; Chart.defaults.font.family = "'DM Sans', sans-
 const dateOpts = { weekday:'long', day:'numeric', month:'short' };
 let today = new Date().toLocaleDateString('es-CO', dateOpts);
 document.getElementById('dateDisplay').textContent = today.charAt(0).toUpperCase() + today.slice(1);
-
-// ── MODO PRIVACIDAD 👁️ ──
-function togglePrivacy() {
-  isPrivacy = !isPrivacy;
-  const btn = document.getElementById('privacyBtn');
-  if(isPrivacy) {
-    document.body.classList.add('privacy-mode');
-    btn.textContent = '🙈';
-    btn.style.background = 'var(--blue)';
-    btn.style.borderColor = 'var(--blue)';
-    
-    // Contrae todos los elementos si entra en privacidad
-    document.querySelectorAll('.expanded-item').forEach(el => el.classList.remove('expanded-item'));
-    document.querySelectorAll('.expanded-text').forEach(el => el.classList.remove('expanded-text'));
-  } else {
-    document.body.classList.remove('privacy-mode');
-    btn.textContent = '👁️';
-    btn.style.background = 'var(--glass-bg)';
-    btn.style.borderColor = 'var(--glass-border)';
-  }
-}
-
-// ── EXPANSIÓN IN-PLACE LIMPIA (CERO SALTOS) ──
-function toggleExpand(element) {
-  if(isPrivacy) return; 
-  
-  const isCard = element.classList.contains('card') || element.classList.contains('card-value') || element.id.includes('calc');
-  
-  if (isCard) {
-    const cardValue = element.classList.contains('card-value') ? element : element.querySelector('.card-value') || element.querySelector('.tx-amount');
-    if (cardValue) cardValue.classList.toggle('expanded-text');
-    return;
-  }
-  
-  const txItem = element.closest('.tx-item');
-  if (txItem) {
-    // Si abre uno nuevo, cierra los demás para mantener orden
-    document.querySelectorAll('.expanded-item').forEach(el => {
-      if(el !== txItem) el.classList.remove('expanded-item');
-    });
-    txItem.classList.toggle('expanded-item');
-  }
-}
-
-// ── Animación Números Fluida ──
-const animatedElements = new Map();
-function animateValue(elId, newVal) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  const startVal = animatedElements.has(elId) ? animatedElements.get(elId) : 0;
-  const duration = 800;
-  let startTime = null;
-  const step = (timestamp) => {
-    if (!startTime) startTime = timestamp;
-    const progress = Math.min((timestamp - startTime) / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 5); 
-    const current = Math.floor(startVal + (newVal - startVal) * ease);
-    el.textContent = fmt(current);
-    if (progress < 1) window.requestAnimationFrame(step);
-    else el.textContent = fmt(newVal);
-  };
-  animatedElements.set(elId, newVal);
-  window.requestAnimationFrame(step);
-}
 
 // ── NAVEGACIÓN DOCK ──
 function showPage(page, tabElement) {
@@ -872,7 +708,6 @@ function toggleCalc() {
 
 // ── Utilidades ──
 function fmtCOP(n) { return Math.round(Math.abs(n)).toLocaleString('es-CO'); }
-// Secreto: \u00A0 (espacio no separable) une el $ al número siempre
 function fmt(n) { return (n < 0 ? '- ' : '') + '$\u00A0' + fmtCOP(Math.abs(n)); } 
 function parseAmount(str) { return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0; }
 function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -989,14 +824,17 @@ function togglePaid(id){ const l=loans.find(x=>x.id===id); if(!l)return; l.paid=
 function deleteLoan(id){ loans = loans.filter(x=>x.id!==id); saveLoans(); renderLoans(); }
 function deleteWishlistItem(id){ wishlist = wishlist.filter(x=>x.id!==id); saveWishlist(); renderWishlist(); }
 
-// ── Renders Base ──
+// ── Renders Base (SIN text-overflow) ──
 function render(){
   const inc = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const exp = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
   const bal = inc-exp; const spend = bal>0?bal*0.6:0; const sav = bal>0?bal*0.4:0;
   
-  animateValue('totalIncome', inc); animateValue('totalExpense', exp);
-  animateValue('spendable', spend); animateValue('savings', sav);
+  document.getElementById('totalIncome').textContent = fmt(inc); 
+  document.getElementById('totalExpense').textContent = fmt(exp);
+  document.getElementById('spendable').textContent = fmt(spend); 
+  document.getElementById('savings').textContent = fmt(sav);
+  
   document.getElementById('savingsPercent').textContent = inc>0 ? Math.round((sav/inc)*100)+'%' : '0%';
   document.getElementById('savingsBar').style.width = (inc>0 ? Math.min(100,(sav/inc)*100) : 0) + '%';
 
@@ -1004,12 +842,12 @@ function render(){
   if(!transactions.length) { list.innerHTML='<div style="text-align:center; color:var(--text-muted); padding:32px; font-weight:800;">No hay movimientos aún</div>'; }
   else {
     list.innerHTML = transactions.map((t,i)=>`
-      <div class="tx-item glass-panel clickable-text" style="animation-delay:${i*0.04}s" onclick="toggleExpand(this)">
+      <div class="tx-item glass-panel" style="animation-delay:${i*0.04}s">
         <div class="tx-icon ${t.type}">${t.type==='income'?'↑':'↓'}</div>
         <div class="tx-info"><div class="tx-desc">${escapeHtml(t.reason)}</div><div class="tx-date">${t.date}</div></div>
         <div class="tx-right">
-          <div class="tx-amount ${t.type} sensitive">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
-          ${t.original?`<div class="tx-original sensitive">${t.original}</div>`:''}
+          <div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
+          ${t.original?`<div class="tx-original">${t.original}</div>`:''}
         </div>
         <button class="tx-delete" onclick="event.stopPropagation(); deleteTransaction(${t.id})">✕</button>
       </div>`).join('');
@@ -1018,7 +856,10 @@ function render(){
 
 function renderLoans(){
   const lentPending = loans.filter(l=>l.type==='lent'&&!l.paid); const owedPending = loans.filter(l=>l.type==='owed'&&!l.paid);
-  animateValue('totalLent', lentPending.reduce((s,l)=>s+l.amount,0)); animateValue('totalOwed', owedPending.reduce((s,l)=>s+l.amount,0));
+  
+  document.getElementById('totalLent').textContent = fmt(lentPending.reduce((s,l)=>s+l.amount,0));
+  document.getElementById('totalOwed').textContent = fmt(owedPending.reduce((s,l)=>s+l.amount,0));
+  
   document.getElementById('lentPendingCount').textContent = `${lentPending.length} pendientes`; document.getElementById('owedPendingCount').textContent = `${owedPending.length} pendientes`;
   
   ['lent','owed'].forEach(t=>{
@@ -1026,17 +867,17 @@ function renderLoans(){
     const list = document.getElementById(t+'List');
     if(!filtered.length) list.innerHTML='<div style="text-align:center; color:var(--text-muted); padding:32px; font-weight:800;">Lista limpia</div>';
     else list.innerHTML = filtered.map((l,i)=>`
-      <div class="tx-item glass-panel clickable-text" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch; opacity:${l.paid?'0.5':'1'};" onclick="toggleExpand(this)">
+      <div class="tx-item glass-panel" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch; opacity:${l.paid?'0.5':'1'};">
         <div style="display:flex; align-items:center; gap:16px;">
           <div class="tx-icon ${t}">${l.person.substring(0,2).toUpperCase()}</div>
-          <div class="tx-info"><div class="tx-desc">${escapeHtml(l.person)}</div><div class="tx-date">${l.date}</div></div>
+          <div class="tx-info"><div style="font-size:16px; font-weight:800; letter-spacing:-0.3px;">${escapeHtml(l.person)}</div><div class="tx-date">${l.date}</div></div>
           <div class="tx-right">
-            <div class="tx-amount ${t} sensitive" style="${l.paid?'text-decoration:line-through;':''}">${fmt(l.amount)}</div>
-            ${l.original?`<div class="tx-original sensitive">${l.original}</div>`:''}
+            <div class="tx-amount ${t}" style="${l.paid?'text-decoration:line-through;':''}">${fmt(l.amount)}</div>
+            ${l.original?`<div class="tx-original">${l.original}</div>`:''}
           </div>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
-          <button style="font-size:12px; font-weight:800; padding:12px 20px; border-radius:var(--radius-pill); border:none; cursor:pointer; background:${l.paid?'rgba(255,255,255,0.15)':t==='lent'?'var(--orange)':'var(--purple)'}; color:${l.paid?'var(--text)':'#000'}; transition:all 0.3s var(--press-effect);" onclick="event.stopPropagation(); togglePaid(${l.id})">${l.paid?'Revertir':'Pagado ✓'}</button>
+          <button style="font-size:12px; font-weight:800; padding:12px 20px; border-radius:var(--radius-pill); border:none; cursor:pointer; background:${l.paid?'rgba(255,255,255,0.15)':t==='lent'?'var(--orange)':'var(--purple)'}; color:${l.paid?'var(--text)':'#000'}; transition:all 0.3s;" onclick="event.stopPropagation(); togglePaid(${l.id})">${l.paid?'Revertir':'Pagado ✓'}</button>
           <button class="tx-delete" onclick="event.stopPropagation(); deleteLoan(${l.id})">✕</button>
         </div>
       </div>`).join('');
@@ -1045,23 +886,24 @@ function renderLoans(){
 
 function renderWishlist(){
   const bal = transactions.reduce((s,t)=>s+(t.type==='income'?t.amount:-t.amount),0);
-  animateValue('buyCurrentBalance', bal);
+  document.getElementById('buyCurrentBalance').textContent = fmt(bal);
+  
   const container = document.getElementById('wishlistContainer');
   if(!wishlist.length) container.innerHTML='<div style="text-align:center; color:var(--text-muted); padding:32px; font-weight:800;">No tienes metas añadidas</div>';
   else container.innerHTML = wishlist.map((item,i)=>{
     const rem = bal - item.amount; const c = rem>=0?'var(--green)':'var(--red)';
-    return `<div class="tx-item glass-panel clickable-text" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch;" onclick="toggleExpand(this)">
+    return `<div class="tx-item glass-panel" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch;">
       <div style="display:flex; align-items:center; gap:16px; margin-bottom:14px;">
         <div class="tx-icon buy">🛍️</div>
         <div class="tx-info"><div class="tx-desc">${escapeHtml(item.name)}</div></div>
         <div class="tx-right">
-          <div class="tx-amount sensitive" style="color:#fff;">${fmt(item.amount)}</div>
-          ${item.original?`<div class="tx-original sensitive">${item.original}</div>`:''}
+          <div class="tx-amount" style="color:#fff;">${fmt(item.amount)}</div>
+          ${item.original?`<div class="tx-original">${item.original}</div>`:''}
         </div>
         <button class="tx-delete" onclick="event.stopPropagation(); deleteWishlistItem(${item.id})">✕</button>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:13px; padding-top:16px; border-top:1px solid var(--glass-border);">
-        <span style="color:var(--text-muted); font-weight:800;">Te quedaría en cuenta:</span><span class="sensitive" style="font-weight:800; font-size:16px; color:${c}">${fmt(rem)}</span>
+        <span style="color:var(--text-muted); font-weight:800;">Te quedaría en cuenta:</span><span style="font-family:'DM Sans'; font-weight:800; font-size:16px; color:${c}">${fmt(rem)}</span>
       </div>
     </div>`;
   }).join('');
@@ -1071,7 +913,11 @@ function renderCalc(){
   const bal = transactions.reduce((s,t)=>s+(t.type==='income'?t.amount:-t.amount),0);
   const o = loans.filter(l=>l.type==='owed'&&!l.paid).reduce((s,l)=>s+l.amount,0);
   const l = loans.filter(l=>l.type==='lent'&&!l.paid).reduce((s,l)=>s+l.amount,0);
-  animateValue('calcTotal', bal+o+l); animateValue('calcBalance', bal); animateValue('calcOwed', o); animateValue('calcLent', l);
+  
+  document.getElementById('calcTotal').textContent = fmt(bal+o+l); 
+  document.getElementById('calcBalance').textContent = fmt(bal); 
+  document.getElementById('calcOwed').textContent = fmt(o); 
+  document.getElementById('calcLent').textContent = fmt(l);
 }
 
 function renderGraphs(){
