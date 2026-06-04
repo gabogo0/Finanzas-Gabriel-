@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finanzas Gabriel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #18181f;
+  --border: rgba(255,255,255,0.06);
+  --text: #f0f0f5;
+  --text-muted: #6b6b7e;
+  --green: #00e5a0;
+  --green-dim: rgba(0,229,160,0.1);
+  --red: #ff4f6a;
+  --red-dim: rgba(255,79,106,0.1);
+  --gold: #f5c542;
+  --gold-dim: rgba(245,197,66,0.12);
+  --blue: #5b8fff;
+  --blue-dim: rgba(91,143,255,0.1);
+  --purple: #b57bff;
+  --purple-dim: rgba(181,123,255,0.1);
+  --orange: #ff9c40;
+  --orange-dim: rgba(255,156,64,0.1);
+  --teal: #00d4ff;
+  --teal-dim: rgba(0,212,255,0.1);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -10%, rgba(0,229,160,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 110%, rgba(91,143,255,0.06) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+
+/* ── App shell ── */
+.app { position:relative; z-index:1; max-width:480px; margin:0 auto; padding:20px 16px 60px; }
+
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px; padding-top:6px;
+}
+
+.logo { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.5px; }
+.logo span { color:var(--green); }
+
+.date-badge {
+  font-size:11px; color:var(--text-muted);
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:20px; padding:5px 11px;
+}
+
+/* ── Nav ── */
+.nav-tabs {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:5px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:5px; margin-bottom:20px;
+}
+
+.nav-tab {
+  padding:9px 4px; border-radius:var(--radius-sm); border:none;
+  background:none; color:var(--text-muted);
+  font-family:'Syne',sans-serif; font-size:10px; font-weight:700;
+  cursor:pointer; transition:all 0.25s cubic-bezier(.34,1.56,.64,1);
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+.nav-tab .tab-icon { font-size:15px; transition:transform 0.25s cubic-bezier(.34,1.56,.64,1); }
+.nav-tab:hover .tab-icon { transform:scale(1.2); }
+.nav-tab.active-fin  { background:var(--green-dim);  color:var(--green); }
+.nav-tab.active-lent { background:var(--orange-dim); color:var(--orange); }
+.nav-tab.active-owed { background:var(--purple-dim); color:var(--purple); }
+.nav-tab.active-calc { background:var(--teal-dim);   color:var(--teal); }
+
+/* ── Pages ── */
+.page { display:none; animation:fadeUp 0.3s ease both; }
+.page.active { display:block; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Cards ── */
+.summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px;
+  transition:transform 0.2s ease, box-shadow 0.2s ease;
+  animation:fadeUp 0.35s ease both;
+}
+.card:active { transform:scale(0.98); }
+.card.wide { grid-column:1/-1; }
+
+.card-label { font-size:10px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+.card-value { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; line-height:1; transition:all 0.4s ease; }
+.card-sub { font-size:11px; color:var(--text-muted); margin-top:5px; }
+
+.card.income  { border-color:rgba(0,229,160,0.2); }  .card.income  .card-value { color:var(--green); }
+.card.expense { border-color:rgba(255,79,106,0.2); }  .card.expense .card-value { color:var(--red); }
+.card.spendable{ border-color:rgba(91,143,255,0.2); } .card.spendable .card-value { color:var(--blue); }
+.card.savings  { border-color:rgba(245,197,66,0.2); } .card.savings  .card-value { color:var(--gold); }
+.card.lent     { border-color:rgba(255,156,64,0.25); } .card.lent   .card-value { color:var(--orange); }
+.card.owed     { border-color:rgba(181,123,255,0.25); } .card.owed  .card-value { color:var(--purple); }
+.card.total-wealth { border-color:rgba(0,212,255,0.3); background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(91,143,255,0.05)); }
+.card.total-wealth .card-value { color:var(--teal); font-size:28px; }
+
+.savings-bar-wrap { margin-top:10px; background:var(--surface2); border-radius:4px; height:5px; overflow:hidden; }
+.savings-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:4px; transition:width 0.7s cubic-bezier(.34,1.56,.64,1); width:0%; }
+
+/* ── Rate section ── */
+.rate-section {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px 16px; margin-bottom:10px;
+  display:none; animation:fadeUp 0.3s ease;
+}
+.rate-section.visible { display:block; }
+.rate-section-title { font-size:10px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
+.rate-row { display:flex; gap:8px; align-items:center; }
+.rate-input-wrap { position:relative; flex:1; }
+.rate-input-prefix { position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--text-muted); pointer-events:none; }
+.rate-source-toggle { display:flex; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; flex-shrink:0; margin-bottom:10px; }
+.src-btn { padding:0 12px; height:40px; background:none; border:none; color:var(--text-muted); font-family:'Syne',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+.src-btn.active { background:var(--gold-dim); color:var(--gold); }
+.src-btn:first-child { border-right:1px solid var(--border); }
+.rate-hint { font-size:11px; color:var(--text-muted); margin-top:6px; }
+.rate-hint span { color:var(--gold); font-weight:600; }
+
+/* ── Forms ── */
+.form-section {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px; margin-bottom:10px;
+  animation:fadeUp 0.4s ease both;
+}
+.form-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:14px; }
+
+.type-toggle { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:14px; }
+.type-btn {
+  padding:9px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--surface2); color:var(--text-muted);
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+  cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.type-btn:active { transform:scale(0.96); }
+.type-btn.active-income  { background:var(--green-dim);  border-color:var(--green);  color:var(--green); }
+.type-btn.active-expense { background:var(--red-dim);    border-color:var(--red);    color:var(--red); }
+
+.input-group { margin-bottom:11px; }
+.input-label { font-size:10px; font-weight:500; letter-spacing:0.6px; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px; display:block; }
+
+.amount-row { display:flex; gap:7px; }
+.currency-toggle { display:flex; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; flex-shrink:0; }
+.cur-btn { padding:0 12px; background:none; border:none; color:var(--text-muted); font-family:'Syne',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+.cur-btn.active { background:var(--gold-dim); color:var(--gold); }
+.cur-btn:first-child { border-right:1px solid var(--border); }
+
+.amount-input-wrap { position:relative; flex:1; }
+.amount-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:13px; pointer-events:none; font-family:'Syne',sans-serif; font-weight:600; }
+
+input {
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:11px 13px; color:var(--text);
+  font-family:'DM Sans',sans-serif; font-size:15px; outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+input:focus { border-color:rgba(255,255,255,0.18); box-shadow:0 0 0 3px rgba(255,255,255,0.03); }
+input::placeholder { color:var(--text-muted); }
+input.with-prefix { padding-left:36px; }
+
+.conversion-preview { font-size:11px; color:var(--text-muted); margin-top:4px; min-height:15px; transition:all 0.2s; }
+.conversion-preview.active { color:var(--gold); }
+
+.add-btn {
+  width:100%; padding:13px; border-radius:var(--radius-sm); border:none;
+  font-family:'Syne',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.4px;
+  cursor:pointer; transition:all 0.2s; margin-top:3px;
+}
+.add-btn:active { transform:scale(0.97); }
+.add-btn.btn-income  { background:var(--green);  color:#0a0a0f; }
+.add-btn.btn-income:hover  { filter:brightness(1.1); }
+.add-btn.btn-expense { background:var(--red);    color:#fff; }
+.add-btn.btn-expense:hover { filter:brightness(1.1); }
+.add-btn.btn-lent    { background:var(--orange); color:#0a0a0f; }
+.add-btn.btn-lent:hover    { filter:brightness(1.1); }
+.add-btn.btn-owed    { background:var(--purple); color:#0a0a0f; }
+.add-btn.btn-owed:hover    { filter:brightness(1.1); }
+
+/* ── History ── */
+.history-section { margin-top:4px; }
+.history-header {
+  font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
+  letter-spacing:0.5px; text-transform:uppercase; color:var(--text-muted);
+  margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;
+}
+.clear-btn {
+  font-size:11px; color:var(--text-muted); background:none;
+  border:1px solid var(--border); border-radius:20px; padding:4px 10px;
+  cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.clear-btn:hover { border-color:var(--red); color:var(--red); }
+
+.tx-list { display:flex; flex-direction:column; gap:7px; }
+
+.tx-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:13px 14px;
+  display:flex; align-items:center; gap:11px;
+  animation:slideIn 0.3s cubic-bezier(.34,1.2,.64,1) both;
+  transition:transform 0.15s, opacity 0.15s;
+}
+.tx-item:active { transform:scale(0.98); }
+
+@keyframes slideIn {
+  from { opacity:0; transform:translateX(-10px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+
+.tx-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.tx-icon.income  { background:var(--green-dim); }
+.tx-icon.expense { background:var(--red-dim); }
+.tx-info { flex:1; min-width:0; }
+.tx-desc { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tx-date { font-size:10px; color:var(--text-muted); margin-top:2px; }
+.tx-right { display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0; gap:2px; }
+.tx-amount { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+.tx-amount.income  { color:var(--green); }
+.tx-amount.expense { color:var(--red); }
+.tx-original { font-size:10px; color:var(--gold); }
+.tx-delete { background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; font-size:16px; line-height:1; border-radius:6px; transition:all 0.2s; flex-shrink:0; }
+.tx-delete:hover { background:var(--red-dim); color:var(--red); }
+
+/* ── Loan items ── */
+.loans-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+
+/* Filter tabs for loans */
+.filter-tabs {
+  display:flex; gap:6px; margin-bottom:12px;
+}
+.filter-tab {
+  padding:6px 14px; border-radius:20px; border:1px solid var(--border);
+  background:none; color:var(--text-muted); font-family:'DM Sans',sans-serif;
+  font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s;
+}
+.filter-tab.active-all    { background:var(--surface2); color:var(--text); border-color:rgba(255,255,255,0.15); }
+.filter-tab.active-pending{ background:var(--orange-dim); color:var(--orange); border-color:var(--orange); }
+.filter-tab.active-paid   { background:var(--green-dim);  color:var(--green);  border-color:var(--green); }
+
+.loan-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  animation:slideIn 0.3s cubic-bezier(.34,1.2,.64,1) both;
+  overflow:hidden; transition:transform 0.15s;
+}
+.loan-item:active { transform:scale(0.99); }
+.loan-item.lent { border-left:3px solid var(--orange); }
+.loan-item.owed { border-left:3px solid var(--purple); }
+.loan-item.paid { opacity:0.55; }
+.loan-item.paid .loan-amount { text-decoration:line-through; }
+
+.loan-main { padding:13px 14px; display:flex; align-items:center; gap:10px; }
+
+.loan-avatar {
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-size:13px; font-weight:800; flex-shrink:0;
+  transition:transform 0.2s;
+}
+.loan-avatar.lent { background:var(--orange-dim); color:var(--orange); }
+.loan-avatar.owed { background:var(--purple-dim); color:var(--purple); }
+
+.loan-info { flex:1; min-width:0; }
+.loan-person { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.loan-note { font-size:11px; color:var(--text-muted); margin-top:1px; }
+
+.loan-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex-shrink:0; }
+.loan-amount { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
+.loan-amount.lent { color:var(--orange); }
+.loan-amount.owed { color:var(--purple); }
+.loan-original { font-size:10px; color:var(--gold); }
+
+.loan-footer {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 14px 11px;
+  border-top:1px solid var(--border);
+}
+.loan-meta { display:flex; align-items:center; gap:6px; }
+.loan-tag {
+  font-size:9px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
+  padding:3px 7px; border-radius:20px;
+}
+.loan-tag.lent  { background:var(--orange-dim); color:var(--orange); }
+.loan-tag.owed  { background:var(--purple-dim); color:var(--purple); }
+.loan-tag.paid  { background:var(--green-dim);  color:var(--green); }
+.loan-date { font-size:10px; color:var(--text-muted); }
+
+.loan-actions { display:flex; gap:5px; }
+
+.loan-settle-btn {
+  font-size:11px; font-weight:600; padding:5px 10px; border-radius:20px;
+  border:none; cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif;
+}
+.loan-settle-btn:active { transform:scale(0.95); }
+.loan-settle-btn.lent { background:var(--orange-dim); color:var(--orange); border:1px solid rgba(255,156,64,0.3); }
+.loan-settle-btn.lent:hover { background:var(--orange); color:#0a0a0f; }
+.loan-settle-btn.owed { background:var(--purple-dim); color:var(--purple); border:1px solid rgba(181,123,255,0.3); }
+.loan-settle-btn.owed:hover { background:var(--purple); color:#0a0a0f; }
+.loan-settle-btn.unpay { background:var(--surface2); color:var(--text-muted); border:1px solid var(--border); font-size:10px; }
+.loan-settle-btn.unpay:hover { color:var(--orange); border-color:var(--orange); }
+
+.loan-delete-btn {
+  background:none; border:1px solid var(--border); color:var(--text-muted);
+  padding:5px 8px; border-radius:20px; cursor:pointer; font-size:12px; transition:all 0.2s;
+}
+.loan-delete-btn:hover { border-color:var(--red); color:var(--red); background:var(--red-dim); }
+
+/* ── Calculator page ── */
+.calc-hero {
+  background:linear-gradient(135deg, rgba(0,212,255,0.08), rgba(91,143,255,0.06));
+  border:1px solid rgba(0,212,255,0.2);
+  border-radius:var(--radius); padding:22px 20px; margin-bottom:12px;
+  text-align:center; animation:fadeUp 0.35s ease both;
+}
+.calc-hero-label { font-size:11px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+.calc-hero-value { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:var(--teal); line-height:1; transition:all 0.5s ease; }
+.calc-hero-sub { font-size:12px; color:var(--text-muted); margin-top:8px; }
+
+.calc-breakdown { display:flex; flex-direction:column; gap:8px; animation:fadeUp 0.4s ease both; }
+
+.calc-row {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:transform 0.15s;
+}
+.calc-row:active { transform:scale(0.98); }
+
+.calc-row-left { display:flex; align-items:center; gap:10px; }
+.calc-row-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.calc-row-label { font-size:13px; font-weight:500; }
+.calc-row-sub { font-size:10px; color:var(--text-muted); margin-top:1px; }
+.calc-row-value { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
+
+.calc-divider {
+  display:flex; align-items:center; gap:8px; margin:4px 0;
+  color:var(--text-muted); font-size:11px;
+}
+.calc-divider::before, .calc-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── Shared ── */
+.empty-state { text-align:center; padding:36px 20px; color:var(--text-muted); font-size:13px; }
+.empty-state .emoji { font-size:34px; margin-bottom:8px; }
+
+.toast {
+  position:fixed; bottom:22px; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:30px; padding:11px 20px;
+  font-size:13px; font-weight:500;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  z-index:999; transition:transform 0.35s cubic-bezier(.34,1.56,.64,1); white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.green  { color:var(--green);  border-color:rgba(0,229,160,0.3); }
+.toast.red    { color:var(--red);    border-color:rgba(255,79,106,0.3); }
+.toast.orange { color:var(--orange); border-color:rgba(255,156,64,0.3); }
+.toast.purple { color:var(--purple); border-color:rgba(181,123,255,0.3); }
+.toast.teal   { color:var(--teal);   border-color:rgba(0,212,255,0.3); }
+
+@keyframes spin { to { transform:rotate(360deg); } }
+.spinning { display:inline-block; animation:spin 0.8s linear infinite; }
+
+/* Pulse animation for numbers updating */
+@keyframes numPulse {
+  0%   { transform:scale(1); }
+  50%  { transform:scale(1.04); }
+  100% { transform:scale(1); }
+}
+.pulse { animation:numPulse 0.35s ease; }
+
+@media(max-width:360px) {
+  .card-value { font-size:18px; }
+  .nav-tab { font-size:9px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">Finanzas <span>Gabriel</span></div>
+    <div class="date-badge" id="dateDisplay"></div>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active-fin"  id="tabFin"  onclick="showPage('fin')"><span class="tab-icon">💰</span>Inicio</button>
+    <button class="nav-tab"             id="tabLent" onclick="showPage('lent')"><span class="tab-icon">📤</span>Presté</button>
+    <button class="nav-tab"             id="tabOwed" onclick="showPage('owed')"><span class="tab-icon">📥</span>Me deben</button>
+    <button class="nav-tab"             id="tabCalc" onclick="showPage('calc')"><span class="tab-icon">🧮</span>Total</button>
+  </div>
+
+  <!-- ══════════════ FINANZAS ══════════════ -->
+  <div class="page active" id="pageFin">
+    <div class="summary-grid">
+      <div class="card income">  <div class="card-label">Ingresos</div>  <div class="card-value" id="totalIncome">$ 0</div></div>
+      <div class="card expense"> <div class="card-label">Egresos</div>   <div class="card-value" id="totalExpense">$ 0</div></div>
+      <div class="card spendable"><div class="card-label">Puedes gastar (60%)</div><div class="card-value" id="spendable">$ 0</div><div class="card-sub">Del saldo disponible</div></div>
+      <div class="card savings wide">
+        <div class="card-label">Ahorro (40%)</div>
+        <div class="card-value" id="savings">$ 0</div>
+        <div class="savings-bar-wrap"><div class="savings-bar" id="savingsBar"></div></div>
+        <div class="card-sub" id="savingsPercent">0% de tus ingresos</div>
+      </div>
+    </div>
+
+    <!-- Tasa USD -->
+    <div class="rate-section" id="rateSection">
+      <div class="rate-section-title">Tasa de cambio USD → COP</div>
+      <div class="rate-source-toggle">
+        <button class="src-btn active" id="srcManual" onclick="setRateSource('manual')">Manual</button>
+        <button class="src-btn"        id="srcAuto"   onclick="setRateSource('auto')">Automática</button>
+      </div>
+      <div id="manualRateRow" class="rate-row">
+        <div class="rate-input-wrap">
+          <span class="rate-input-prefix">1 USD =</span>
+          <input type="text" id="rateInput" placeholder="ej: 4.200" inputmode="numeric" style="padding-left:62px;" />
+        </div>
+        <button class="add-btn btn-income" style="width:auto;padding:11px 14px;margin:0;" onclick="applyManualRate()">OK</button>
+      </div>
+      <div id="autoRateRow" style="display:none;">
+        <button class="add-btn btn-income" style="width:100%;margin:0;" onclick="fetchRate()">Obtener tasa automática</button>
+      </div>
+      <div class="rate-hint" id="rateHint">Sin tasa — ingresa el valor o usa automática</div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-section">
+      <div class="form-title">➕ Nuevo movimiento</div>
+      <div class="type-toggle">
+        <button class="type-btn active-income" id="btnIncome" onclick="setType('income')">↑ Ingreso</button>
+        <button class="type-btn"               id="btnExpense" onclick="setType('expense')">↓ Egreso</button>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Monto</label>
+        <div class="amount-row">
+          <div class="currency-toggle">
+            <button class="cur-btn active" id="curCOP" onclick="setCurrency('COP')">COP</button>
+            <button class="cur-btn"        id="curUSD" onclick="setCurrency('USD')">USD</button>
+          </div>
+          <div class="amount-input-wrap">
+            <span class="amount-prefix" id="amountPrefix">$</span>
+            <input type="text" id="amountInput" class="with-prefix" placeholder="0" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="conversion-preview" id="conversionPreview"></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label" id="reasonLabel">¿Por qué entró?</label>
+        <input type="text" id="reasonInput" placeholder="ej: salario, venta..." maxlength="60" />
+      </div>
+      <button class="add-btn btn-income" id="addBtn" onclick="addTransaction()">+ Agregar ingreso</button>
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">Movimientos <button class="clear-btn" onclick="clearAll()">Borrar todo</button></div>
+      <div class="tx-list" id="txList"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PRESTÉ ══════════════ -->
+  <div class="page" id="pageLent">
+    <div class="loans-summary">
+      <div class="card lent">
+        <div class="card-label">Total prestado</div>
+        <div class="card-value" id="totalLent">$ 0</div>
+        <div class="card-sub" id="lentPendingCount">0 pendientes</div>
+      </div>
+      <div class="card income">
+        <div class="card-label">Ya cobrado</div>
+        <div class="card-value" id="totalLentPaid">$ 0</div>
+        <div class="card-sub" id="lentPaidCount">0 saldados</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-title">📤 Registrar préstamo</div>
+      <div class="input-group">
+        <label class="input-label">¿A quién le presté?</label>
+        <input type="text" id="lentPerson" placeholder="Nombre de la persona" maxlength="40" />
+      </div>
+      <div class="input-group">
+        <label class="input-label">Monto</label>
+        <div class="amount-row">
+          <div class="currency-toggle">
+            <button class="cur-btn active" id="lentCurCOP" onclick="setLoanCurrency('lent','COP')">COP</button>
+            <button class="cur-btn"        id="lentCurUSD" onclick="setLoanCurrency('lent','USD')">USD</button>
+          </div>
+          <div class="amount-input-wrap">
+            <span class="amount-prefix" id="lentAmountPrefix">$</span>
+            <input type="text" id="lentAmount" class="with-prefix" placeholder="0" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="conversion-preview" id="lentConvPreview"></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nota (opcional)</label>
+        <input type="text" id="lentNote" placeholder="ej: para el arriendo, me paga el viernes..." maxlength="80" />
+      </div>
+      <button class="add-btn btn-lent" onclick="addLoan('lent')">📤 Registrar préstamo</button>
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        Préstamos
+        <button class="clear-btn" onclick="clearLoans('lent')">Borrar todo</button>
+      </div>
+      <div class="filter-tabs" id="lentFilterTabs">
+        <button class="filter-tab active-all" onclick="setLoanFilter('lent','all')">Todos</button>
+        <button class="filter-tab" onclick="setLoanFilter('lent','pending')">Pendientes</button>
+        <button class="filter-tab" onclick="setLoanFilter('lent','paid')">Saldados</button>
+      </div>
+      <div class="tx-list" id="lentList"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ ME DEBEN ══════════════ -->
+  <div class="page" id="pageOwed">
+    <div class="loans-summary">
+      <div class="card owed">
+        <div class="card-label">Total que me deben</div>
+        <div class="card-value" id="totalOwed">$ 0</div>
+        <div class="card-sub" id="owedPendingCount">0 pendientes</div>
+      </div>
+      <div class="card income">
+        <div class="card-label">Ya recibido</div>
+        <div class="card-value" id="totalOwedPaid">$ 0</div>
+        <div class="card-sub" id="owedPaidCount">0 saldados</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-title">📥 Registrar deuda</div>
+      <div class="input-group">
+        <label class="input-label">¿Quién me debe?</label>
+        <input type="text" id="owedPerson" placeholder="Nombre de la persona" maxlength="40" />
+      </div>
+      <div class="input-group">
+        <label class="input-label">Monto</label>
+        <div class="amount-row">
+          <div class="currency-toggle">
+            <button class="cur-btn active" id="owedCurCOP" onclick="setLoanCurrency('owed','COP')">COP</button>
+            <button class="cur-btn"        id="owedCurUSD" onclick="setLoanCurrency('owed','USD')">USD</button>
+          </div>
+          <div class="amount-input-wrap">
+            <span class="amount-prefix" id="owedAmountPrefix">$</span>
+            <input type="text" id="owedAmount" class="with-prefix" placeholder="0" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="conversion-preview" id="owedConvPreview"></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nota (opcional)</label>
+        <input type="text" id="owedNote" placeholder="ej: del almuerzo, lo del viaje..." maxlength="80" />
+      </div>
+      <button class="add-btn btn-owed" onclick="addLoan('owed')">📥 Registrar deuda</button>
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        Deudas
+        <button class="clear-btn" onclick="clearLoans('owed')">Borrar todo</button>
+      </div>
+      <div class="filter-tabs" id="owedFilterTabs">
+        <button class="filter-tab active-all" onclick="setLoanFilter('owed','all')">Todos</button>
+        <button class="filter-tab" onclick="setLoanFilter('owed','pending')">Pendientes</button>
+        <button class="filter-tab" onclick="setLoanFilter('owed','paid')">Saldados</button>
+      </div>
+      <div class="tx-list" id="owedList"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ CALCULADORA TOTAL ══════════════ -->
+  <div class="page" id="pageCalc">
+    <div class="calc-hero">
+      <div class="calc-hero-label">Si todo se resolviera hoy, tendrías</div>
+      <div class="calc-hero-value" id="calcTotal">$ 0</div>
+      <div class="calc-hero-sub" id="calcSub">Saldo actual + lo que te deben + lo que prestaste</div>
+    </div>
+
+    <div class="calc-breakdown">
+      <div class="calc-row">
+        <div class="calc-row-left">
+          <div class="calc-row-dot" style="background:var(--blue)"></div>
+          <div>
+            <div class="calc-row-label">Saldo actual</div>
+            <div class="calc-row-sub">Ingresos − Egresos</div>
+          </div>
+        </div>
+        <div class="calc-row-value" style="color:var(--blue)" id="calcBalance">$ 0</div>
+      </div>
+
+      <div class="calc-row">
+        <div class="calc-row-left">
+          <div class="calc-row-dot" style="background:var(--purple)"></div>
+          <div>
+            <div class="calc-row-label">Me deben (pendiente)</div>
+            <div class="calc-row-sub" id="calcOwedSub">0 personas</div>
+          </div>
+        </div>
+        <div class="calc-row-value" style="color:var(--purple)" id="calcOwed">$ 0</div>
+      </div>
+
+      <div class="calc-row">
+        <div class="calc-row-left">
+          <div class="calc-row-dot" style="background:var(--orange)"></div>
+          <div>
+            <div class="calc-row-label">Presté (pendiente)</div>
+            <div class="calc-row-sub" id="calcLentSub">0 personas</div>
+          </div>
+        </div>
+        <div class="calc-row-value" style="color:var(--orange)" id="calcLent">$ 0</div>
+      </div>
+
+      <div class="calc-divider">de ese total, tu 40% de ahorro sería</div>
+
+      <div class="calc-row">
+        <div class="calc-row-left">
+          <div class="calc-row-dot" style="background:var(--gold)"></div>
+          <div>
+            <div class="calc-row-label">Ahorro potencial (40%)</div>
+            <div class="calc-row-sub">Si cobras todo hoy</div>
+          </div>
+        </div>
+        <div class="calc-row-value" style="color:var(--gold)" id="calcSavings">$ 0</div>
+      </div>
+
+      <div class="calc-row">
+        <div class="calc-row-left">
+          <div class="calc-row-dot" style="background:var(--green)"></div>
+          <div>
+            <div class="calc-row-label">Para gastar (60%)</div>
+            <div class="calc-row-sub">Si cobras todo hoy</div>
+          </div>
+        </div>
+        <div class="calc-row-value" style="color:var(--green)" id="calcSpend">$ 0</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+let currentType = 'income';
+let currentCurrency = 'COP';
+let lentCurrency = 'COP';
+let owedCurrency = 'COP';
+let usdRate = null;
+let rateSource = 'manual';
+let currentPage = 'fin';
+let loanFilter = { lent: 'all', owed: 'all' };
+
+let transactions = JSON.parse(localStorage.getItem('fg_tx')    || '[]');
+let loans        = JSON.parse(localStorage.getItem('fg_loans') || '[]');
+
+// ── Date ──────────────────────────────────────────────────────────
+document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'});
+
+// ── Navigation ─────────────────────────────────────────────────────
+function showPage(page) {
+  currentPage = page;
+  ['fin','lent','owed','calc'].forEach(p => {
+    const pg = document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1));
+    pg.classList.toggle('active', p === page);
+  });
+  document.getElementById('tabFin').className  = 'nav-tab' + (page==='fin'  ? ' active-fin'  : '');
+  document.getElementById('tabLent').className = 'nav-tab' + (page==='lent' ? ' active-lent' : '');
+  document.getElementById('tabOwed').className = 'nav-tab' + (page==='owed' ? ' active-owed' : '');
+  document.getElementById('tabCalc').className = 'nav-tab' + (page==='calc' ? ' active-calc' : '');
+  if (page === 'calc') renderCalc();
+}
+
+// ── Tasa ───────────────────────────────────────────────────────────
+function setRateSource(src) {
+  rateSource = src;
+  document.getElementById('srcManual').className = 'src-btn' + (src==='manual' ? ' active' : '');
+  document.getElementById('srcAuto').className   = 'src-btn' + (src==='auto'   ? ' active' : '');
+  document.getElementById('manualRateRow').style.display = src==='manual' ? 'flex' : 'none';
+  document.getElementById('autoRateRow').style.display   = src==='auto'   ? 'block' : 'none';
+}
+
+function applyManualRate() {
+  const raw = parseAmount(document.getElementById('rateInput').value);
+  if (!raw || raw < 100) { showToast('Tasa inválida (ej: 4200)', 'red'); return; }
+  usdRate = raw;
+  document.getElementById('rateHint').innerHTML = `1 USD = <span>${fmtCOP(usdRate)}</span> COP ✓`;
+  updateAllPreviews();
+  showToast('✅ Tasa aplicada', 'green');
+}
+
+async function fetchRate() {
+  const hint = document.getElementById('rateHint');
+  hint.textContent = 'Obteniendo...';
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const data = await res.json();
+    usdRate = data.rates['COP'];
+    hint.innerHTML = `1 USD = <span>${fmtCOP(usdRate)}</span> COP — automática ✓`;
+    updateAllPreviews();
+    showToast('✅ Tasa actualizada', 'green');
+  } catch(e) {
+    hint.textContent = 'Sin conexión — usa tasa manual';
+    showToast('Sin conexión', 'red');
+  }
+}
+
+// ── Formateo ───────────────────────────────────────────────────────
+function fmtCOP(n) { return Math.round(Math.abs(n)).toLocaleString('es-CO'); }
+function fmt(n) { return '$ ' + fmtCOP(n); }
+function parseAmount(str) {
+  if (!str) return 0;
+  return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0;
+}
+
+// ── Input formatters ───────────────────────────────────────────────
+function attachFormatter(inputId, previewId, getCur) {
+  const el = document.getElementById(inputId);
+  el.addEventListener('input', function() {
+    const raw = this.value.replace(/\D/g,'');
+    if (!raw) { this.value = ''; updatePreview(previewId, getCur()); return; }
+    this.value = parseInt(raw, 10).toLocaleString('es-CO');
+    updatePreview(previewId, getCur());
+  });
+}
+
+function updatePreview(previewId, cur) {
+  const map = { conversionPreview:'amountInput', lentConvPreview:'lentAmount', owedConvPreview:'owedAmount' };
+  const preview = document.getElementById(previewId);
+  if (cur !== 'USD' || !usdRate) { preview.textContent=''; preview.className='conversion-preview'; return; }
+  const raw = parseAmount(document.getElementById(map[previewId]).value);
+  if (!raw) { preview.textContent=''; preview.className='conversion-preview'; return; }
+  preview.textContent = `≈ $ ${fmtCOP(raw * usdRate)} COP`;
+  preview.className = 'conversion-preview active';
+}
+
+function updateAllPreviews() {
+  updatePreview('conversionPreview', currentCurrency);
+  updatePreview('lentConvPreview', lentCurrency);
+  updatePreview('owedConvPreview', owedCurrency);
+}
+
+attachFormatter('amountInput', 'conversionPreview', () => currentCurrency);
+attachFormatter('lentAmount',  'lentConvPreview',   () => lentCurrency);
+attachFormatter('owedAmount',  'owedConvPreview',   () => owedCurrency);
+attachFormatter('rateInput',   null, () => null);
+
+// ── Currency ───────────────────────────────────────────────────────
+function setCurrency(cur) {
+  currentCurrency = cur;
+  document.getElementById('curCOP').className = cur==='COP' ? 'cur-btn active' : 'cur-btn';
+  document.getElementById('curUSD').className = cur==='USD' ? 'cur-btn active' : 'cur-btn';
+  document.getElementById('amountPrefix').textContent = cur==='USD' ? 'US$' : '$';
+  document.getElementById('amountInput').value = '';
+  document.getElementById('rateSection').classList.toggle('visible', cur==='USD');
+  updatePreview('conversionPreview', cur);
+}
+
+function setLoanCurrency(type, cur) {
+  if (type==='lent') {
+    lentCurrency = cur;
+    document.getElementById('lentCurCOP').className = cur==='COP' ? 'cur-btn active' : 'cur-btn';
+    document.getElementById('lentCurUSD').className = cur==='USD' ? 'cur-btn active' : 'cur-btn';
+    document.getElementById('lentAmountPrefix').textContent = cur==='USD' ? 'US$' : '$';
+    document.getElementById('lentAmount').value = '';
+    updatePreview('lentConvPreview', cur);
+  } else {
+    owedCurrency = cur;
+    document.getElementById('owedCurCOP').className = cur==='COP' ? 'cur-btn active' : 'cur-btn';
+    document.getElementById('owedCurUSD').className = cur==='USD' ? 'cur-btn active' : 'cur-btn';
+    document.getElementById('owedAmountPrefix').textContent = cur==='USD' ? 'US$' : '$';
+    document.getElementById('owedAmount').value = '';
+    updatePreview('owedConvPreview', cur);
+  }
+}
+
+// ── Type toggle ────────────────────────────────────────────────────
+function setType(type) {
+  currentType = type;
+  document.getElementById('btnIncome').className  = 'type-btn' + (type==='income'  ? ' active-income'  : '');
+  document.getElementById('btnExpense').className = 'type-btn' + (type==='expense' ? ' active-expense' : '');
+  const addBtn = document.getElementById('addBtn');
+  addBtn.className = 'add-btn ' + (type==='income' ? 'btn-income' : 'btn-expense');
+  addBtn.textContent = type==='income' ? '+ Agregar ingreso' : '+ Agregar egreso';
+  document.getElementById('reasonLabel').textContent = type==='income' ? '¿Por qué entró?' : '¿Por qué salió?';
+  document.getElementById('reasonInput').placeholder = type==='income'
+    ? 'ej: salario, venta, transferencia...'
+    : 'ej: mercado, arriendo, transporte...';
+}
+
+// ── Loan filter ────────────────────────────────────────────────────
+function setLoanFilter(type, filter) {
+  loanFilter[type] = filter;
+  const tabsId = type==='lent' ? 'lentFilterTabs' : 'owedFilterTabs';
+  const tabs = document.getElementById(tabsId).querySelectorAll('.filter-tab');
+  tabs[0].className = 'filter-tab' + (filter==='all'     ? ' active-all'     : '');
+  tabs[1].className = 'filter-tab' + (filter==='pending' ? ' active-pending' : '');
+  tabs[2].className = 'filter-tab' + (filter==='paid'    ? ' active-paid'    : '');
+  renderLoans();
+}
+
+// ── Transactions ───────────────────────────────────────────────────
+function addTransaction() {
+  const rawInput = parseAmount(document.getElementById('amountInput').value);
+  const reason   = document.getElementById('reasonInput').value.trim();
+  if (!rawInput || rawInput <= 0) { showToast('Ingresa un monto válido', 'red'); return; }
+  if (!reason) { showToast('Describe el motivo', 'red'); return; }
+
+  let amountCOP = rawInput, originalStr = null;
+  if (currentCurrency === 'USD') {
+    if (!usdRate) { showToast('Primero define la tasa de cambio', 'red'); return; }
+    amountCOP = rawInput * usdRate;
+    originalStr = `US$ ${fmtCOP(rawInput)}`;
+  }
+
+  transactions.unshift({ id:Date.now(), type:currentType, amount:amountCOP, original:originalStr, reason,
+    date: new Date().toLocaleString('es-CO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) });
+
+  save();
+  document.getElementById('amountInput').value = '';
+  document.getElementById('reasonInput').value = '';
+  document.getElementById('conversionPreview').textContent = '';
+  showToast(currentType==='income' ? '✅ Ingreso agregado' : '✅ Egreso agregado', 'green');
+  render();
+}
+
+function deleteTransaction(id) {
+  transactions = transactions.filter(t => t.id !== id);
+  save(); render();
+  showToast('Eliminado', 'red');
+}
+
+function clearAll() {
+  if (!transactions.length) return;
+  if (!confirm('¿Borrar todos los movimientos?')) return;
+  transactions = []; save(); render();
+  showToast('Historial limpio', 'red');
+}
+
+// ── Loans ──────────────────────────────────────────────────────────
+function addLoan(type) {
+  const personId = type==='lent' ? 'lentPerson' : 'owedPerson';
+  const amountId = type==='lent' ? 'lentAmount' : 'owedAmount';
+  const noteId   = type==='lent' ? 'lentNote'   : 'owedNote';
+  const cur      = type==='lent' ? lentCurrency  : owedCurrency;
+
+  const person   = document.getElementById(personId).value.trim();
+  const rawInput = parseAmount(document.getElementById(amountId).value);
+  const note     = document.getElementById(noteId).value.trim();
+
+  if (!person)              { showToast('Escribe el nombre', type==='lent' ? 'orange' : 'purple'); return; }
+  if (!rawInput || rawInput<=0) { showToast('Monto inválido', 'red'); return; }
+
+  let amountCOP = rawInput, originalStr = null;
+  if (cur === 'USD') {
+    if (!usdRate) { showToast('Define la tasa en Inicio → USD', 'red'); return; }
+    amountCOP = rawInput * usdRate;
+    originalStr = `US$ ${fmtCOP(rawInput)}`;
+  }
+
+  loans.unshift({ id:Date.now(), type, person, amount:amountCOP, original:originalStr, note, paid:false,
+    date: new Date().toLocaleString('es-CO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),
+    paidDate: null });
+
+  saveLoans();
+  document.getElementById(personId).value = '';
+  document.getElementById(amountId).value = '';
+  document.getElementById(noteId).value   = '';
+  showToast(type==='lent' ? '📤 Préstamo registrado' : '📥 Deuda registrada', type==='lent' ? 'orange' : 'purple');
+  renderLoans();
+}
+
+function togglePaid(id) {
+  const loan = loans.find(l => l.id === id);
+  if (!loan) return;
+  loan.paid = !loan.paid;
+  loan.paidDate = loan.paid ? new Date().toLocaleString('es-CO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : null;
+  saveLoans(); renderLoans();
+  if (loan.paid) showToast('✅ Marcado como saldado', 'green');
+  else showToast('↩ Marcado como pendiente', 'orange');
+}
+
+function deleteLoan(id) {
+  loans = loans.filter(l => l.id !== id);
+  saveLoans(); renderLoans();
+  showToast('Eliminado', 'red');
+}
+
+function clearLoans(type) {
+  if (!loans.filter(l => l.type===type).length) return;
+  if (!confirm('¿Borrar todos estos registros?')) return;
+  loans = loans.filter(l => l.type !== type);
+  saveLoans(); renderLoans();
+  showToast('Registros eliminados', 'red');
+}
+
+// ── Save ───────────────────────────────────────────────────────────
+function save()      { localStorage.setItem('fg_tx',    JSON.stringify(transactions)); }
+function saveLoans() { localStorage.setItem('fg_loans', JSON.stringify(loans)); }
+
+// ── Helpers ────────────────────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function animateValue(elId, newVal) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent = fmt(newVal);
+  el.classList.remove('pulse');
+  void el.offsetWidth;
+  el.classList.add('pulse');
+}
+
+// ── Render Finanzas ────────────────────────────────────────────────
+function render() {
+  const totalIncome  = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const totalExpense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const balance  = totalIncome - totalExpense;
+  const spendable = balance>0 ? balance*0.6 : 0;
+  const savings   = balance>0 ? balance*0.4 : 0;
+  const savingsPct = totalIncome>0 ? Math.round((savings/totalIncome)*100) : 0;
+
+  animateValue('totalIncome', totalIncome);
+  animateValue('totalExpense', totalExpense);
+  animateValue('spendable', spendable);
+  animateValue('savings', savings);
+  document.getElementById('savingsPercent').textContent = `${savingsPct}% de tus ingresos`;
+  document.getElementById('savingsBar').style.width = (totalIncome>0 ? Math.min(100,(savings/totalIncome)*100) : 0) + '%';
+
+  const list = document.getElementById('txList');
+  if (!transactions.length) {
+    list.innerHTML = `<div class="empty-state"><div class="emoji">💸</div>Sin movimientos aún.<br>¡Agrega tu primer ingreso!</div>`;
+    return;
+  }
+  list.innerHTML = transactions.map((t,i) => `
+    <div class="tx-item" style="animation-delay:${i*0.03}s">
+      <div class="tx-icon ${t.type}">${t.type==='income'?'↑':'↓'}</div>
+      <div class="tx-info">
+        <div class="tx-desc">${escapeHtml(t.reason)}</div>
+        <div class="tx-date">${t.date}</div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
+        ${t.original?`<div class="tx-original">${t.original}</div>`:''}
+      </div>
+      <button class="tx-delete" onclick="deleteTransaction(${t.id})">×</button>
+    </div>
+  `).join('');
+}
+
+// ── Render Loans ───────────────────────────────────────────────────
+function renderLoans() {
+  const lentAll = loans.filter(l=>l.type==='lent');
+  const owedAll = loans.filter(l=>l.type==='owed');
+
+  const lentPending = lentAll.filter(l=>!l.paid);
+  const lentPaid    = lentAll.filter(l=>l.paid);
+  const owedPending = owedAll.filter(l=>!l.paid);
+  const owedPaid    = owedAll.filter(l=>l.paid);
+
+  animateValue('totalLent',     lentPending.reduce((s,l)=>s+l.amount,0));
+  animateValue('totalLentPaid', lentPaid.reduce((s,l)=>s+l.amount,0));
+  animateValue('totalOwed',     owedPending.reduce((s,l)=>s+l.amount,0));
+  animateValue('totalOwedPaid', owedPaid.reduce((s,l)=>s+l.amount,0));
+
+  document.getElementById('lentPendingCount').textContent = `${lentPending.length} pendiente${lentPending.length!==1?'s':''}`;
+  document.getElementById('lentPaidCount').textContent    = `${lentPaid.length} saldado${lentPaid.length!==1?'s':''}`;
+  document.getElementById('owedPendingCount').textContent = `${owedPending.length} pendiente${owedPending.length!==1?'s':''}`;
+  document.getElementById('owedPaidCount').textContent    = `${owedPaid.length} saldado${owedPaid.length!==1?'s':''}`;
+
+  // Filter
+  const lentFiltered = loanFilter.lent==='all' ? lentAll : loanFilter.lent==='pending' ? lentPending : lentPaid;
+  const owedFiltered = loanFilter.owed==='all' ? owedAll : loanFilter.owed==='pending' ? owedPending : owedPaid;
+
+  renderLoanList('lentList', lentFiltered, 'lent');
+  renderLoanList('owedList', owedFiltered, 'owed');
+
+  if (currentPage === 'calc') renderCalc();
+}
+
+function renderLoanList(listId, items, type) {
+  const list = document.getElementById(listId);
+  if (!items.length) {
+    const msgs = { lent:'No hay préstamos aquí.', owed:'No hay deudas aquí.' };
+    const emojis = { lent:'🤝', owed:'🙏' };
+    list.innerHTML = `<div class="empty-state"><div class="emoji">${emojis[type]}</div>${msgs[type]}</div>`;
+    return;
+  }
+
+  list.innerHTML = items.map((l,i) => {
+    const initials = l.person.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const isPaid = l.paid;
+    const settleLabel = isPaid
+      ? '↩ Revertir'
+      : (type==='lent' ? 'Ya me pagó ✓' : 'Ya pagué ✓');
+    const settleCls = isPaid ? 'unpay' : type;
+    const tagLabel = isPaid ? 'Saldado' : (type==='lent' ? 'Presté' : 'Me deben');
+    const tagCls   = isPaid ? 'paid' : type;
+
+    return `
+      <div class="loan-item ${type}${isPaid?' paid':''}" style="animation-delay:${i*0.04}s">
+        <div class="loan-main">
+          <div class="loan-avatar ${type}">${initials}</div>
+          <div class="loan-info">
+            <div class="loan-person">${escapeHtml(l.person)}</div>
+            ${l.note ? `<div class="loan-note">${escapeHtml(l.note)}</div>` : ''}
+          </div>
+          <div class="loan-right">
+            <div class="loan-amount ${type}">${fmt(l.amount)}</div>
+            ${l.original?`<div class="loan-original">${l.original}</div>`:''}
+          </div>
+        </div>
+        <div class="loan-footer">
+          <div class="loan-meta">
+            <span class="loan-tag ${tagCls}">${tagLabel}</span>
+            <span class="loan-date">${isPaid && l.paidDate ? '✓ '+l.paidDate : l.date}</span>
+          </div>
+          <div class="loan-actions">
+            <button class="loan-settle-btn ${settleCls}" onclick="togglePaid(${l.id})">${settleLabel}</button>
+            <button class="loan-delete-btn" onclick="deleteLoan(${l.id})">🗑</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Render Calculator ──────────────────────────────────────────────
+function renderCalc() {
+  const totalIncome  = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const totalExpense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const balance = totalIncome - totalExpense;
+
+  const owedPending  = loans.filter(l=>l.type==='owed' && !l.paid);
+  const lentPending  = loans.filter(l=>l.type==='lent' && !l.paid);
+  const totalOwedAmt = owedPending.reduce((s,l)=>s+l.amount,0);
+  const totalLentAmt = lentPending.reduce((s,l)=>s+l.amount,0);
+
+  const grandTotal = balance + totalOwedAmt + totalLentAmt;
+  const calcSavings = grandTotal > 0 ? grandTotal * 0.4 : 0;
+  const calcSpend   = grandTotal > 0 ? grandTotal * 0.6 : 0;
+
+  animateValue('calcTotal',   grandTotal);
+  animateValue('calcBalance', balance);
+  animateValue('calcOwed',    totalOwedAmt);
+  animateValue('calcLent',    totalLentAmt);
+  animateValue('calcSavings', calcSavings);
+  animateValue('calcSpend',   calcSpend);
+
+  document.getElementById('calcOwedSub').textContent = `${owedPending.length} persona${owedPending.length!==1?'s':''} pendiente${owedPending.length!==1?'s':''}`;
+  document.getElementById('calcLentSub').textContent = `${lentPending.length} persona${lentPending.length!==1?'s':''} pendiente${lentPending.length!==1?'s':''}`;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `toast ${type} show`;
+  setTimeout(() => toast.classList.remove('show'), 2400);
+}
+
+// ── Enter keys ─────────────────────────────────────────────────────
+document.getElementById('reasonInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addTransaction(); });
+document.getElementById('amountInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('reasonInput').focus(); });
+document.getElementById('lentPerson').addEventListener('keydown',  e=>{ if(e.key==='Enter') document.getElementById('lentAmount').focus(); });
+document.getElementById('owedPerson').addEventListener('keydown',  e=>{ if(e.key==='Enter') document.getElementById('owedAmount').focus(); });
+
+// ── Boot ───────────────────────────────────────────────────────────
+render();
+renderLoans();
+</script>
+</body>
+</html>
