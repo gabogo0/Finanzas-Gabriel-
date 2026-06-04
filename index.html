@@ -2,23 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Ajuste avanzado para PWA en iOS (ocupa toda la pantalla sin bordes) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/png" href="logo.png?v=1">
     <title>Finanzas Gabriel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Fuentes cargadas con pre-conexión para máxima velocidad -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
-  --bg: #050508;
+  --bg: #06060a;
   
-  /* Efectos Cristal (Glassmorphism avanzado) */
+  /* Glassmorphism Refinado */
   --glass-bg: rgba(25, 25, 35, 0.4);
-  --glass-hover: rgba(40, 40, 55, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.1);
   --glass-highlight: rgba(255, 255, 255, 0.05);
+  --input-bg: rgba(0, 0, 0, 0.35);
   
   --text: #ffffff;
   --text-muted: #9aa0a6;
@@ -36,279 +38,332 @@
   --orange: #ff9c40;
   --orange-dim: rgba(255,156,64,0.15);
   --teal: #00d4ff;
-  --teal-dim: rgba(0,212,255,0.15);
   
-  /* Curvas Extremas (Ovalado/Circular) */
-  --radius-card: 32px;
+  --radius-card: 28px;
   --radius-pill: 50px;
   --radius-circle: 50%;
   
-  /* Animación física de rebote */
-  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Curvas Físicas Nativas (iOS Feel) */
+  --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1.1);
+  --spring-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+  --press-effect: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
+/* Reset de fuentes estricto */
+body, input, button, select, textarea {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.syne-font { font-family: 'Syne', sans-serif; }
+
 body {
   background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
   min-height: 100dvh;
   overflow-x: hidden;
-  position: relative;
-  /* Espacio extra abajo para que el teclado y el Dock no tapen el contenido */
-  padding-bottom: 120px; 
+  padding-bottom: 110px; /* Espacio para el Dock */
 }
 
-/* ── Fondos Ambientales Animados ── */
+/* ── Fondos (GPU Accelerated) ── */
 .bg-orb {
-  position: fixed; border-radius: var(--radius-circle); filter: blur(100px);
-  opacity: 0.35; z-index: -1; animation: floatOrb 12s ease-in-out infinite alternate;
-  pointer-events: none;
+  position: fixed; border-radius: var(--radius-circle); filter: blur(60px);
+  opacity: 0.25; z-index: -1; pointer-events: none;
+  will-change: transform; 
+  animation: floatOrb 15s linear infinite alternate;
 }
-.orb-1 { top: -5%; left: -10%; width: 300px; height: 300px; background: var(--green); }
-.orb-2 { bottom: 10%; right: -10%; width: 350px; height: 350px; background: var(--blue); animation-delay: -6s; }
+.orb-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: var(--green); }
+.orb-2 { bottom: 10%; right: -10%; width: 350px; height: 350px; background: var(--blue); animation-delay: -7s; }
 
 @keyframes floatOrb {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(30px, 40px) scale(1.15); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(20px, 30px, 0) scale(1.1); }
 }
 
-/* ── Contenedor Principal ── */
-.app { position:relative; z-index:1; max-width:500px; margin:0 auto; padding: 20px 16px; padding-top: env(safe-area-inset-top, 20px); }
+/* ── Estructura Global ── */
+.app { 
+  position:relative; z-index:1; max-width:480px; margin:0 auto; 
+  padding: 16px; padding-top: env(safe-area-inset-top, 16px); 
+}
 
 header {
   display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:24px; padding: 10px 8px;
+  margin-bottom:20px; padding: 4px;
 }
-.logo { font-family:'Syne',sans-serif; font-weight:800; font-size:26px; letter-spacing:-1px; text-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+.logo { font-weight:800; font-size:24px; letter-spacing:-0.5px; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
 .logo span { color:var(--green); }
 .date-badge {
   font-size:12px; font-weight:700; color:var(--text);
   background: var(--glass-bg); border:1px solid var(--glass-border);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-radius: var(--radius-pill); padding:8px 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* ── Dock Flotante Inferior (Isla dinámica) ── */
+/* ── DOCK FLOTANTE (ANIMACIÓN INCREÍBLE) ── */
 .nav-dock-container {
-  position: fixed; bottom: 24px; left: 0; right: 0;
+  position: fixed; bottom: 20px; left: 0; right: 0;
   display: flex; justify-content: center; z-index: 1000;
-  padding: 0 16px; padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding: 0 12px; padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .nav-dock {
-  background: rgba(20, 20, 30, 0.7); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  background: rgba(15, 15, 20, 0.75); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
   border: 1px solid var(--glass-border); border-radius: var(--radius-pill);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-  display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 8px; max-width: 100%; -webkit-overflow-scrolling: touch;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  width: 100%; max-width: 460px; padding: 6px;
 }
-.nav-dock::-webkit-scrollbar { display: none; }
-
 .nav-tab {
-  flex: 0 0 auto; scroll-snap-align: center;
-  padding: 12px 20px; border-radius: var(--radius-pill);
-  background: transparent; color: var(--text-muted);
-  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-  cursor: pointer; display: flex; align-items: center; gap: 8px;
-  transition: all 0.4s var(--spring);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 0; border-radius: var(--radius-pill); background: transparent;
+  color: var(--text-muted); cursor: pointer; 
+  transition: all 0.4s var(--spring-bouncy);
+  position: relative; overflow: visible;
+  will-change: transform, background-color;
 }
-.nav-tab .tab-icon { font-size: 20px; transition: transform 0.4s var(--spring); }
-.nav-tab.active { background: #ffffff; color: #000000; box-shadow: 0 4px 16px rgba(255,255,255,0.3); }
-.nav-tab.active .tab-icon { transform: scale(1.15) rotate(-5deg); }
+/* Efecto de presión (se hunde suavemente) */
+.nav-tab:active { transform: scale(0.85) translate3d(0, 4px, 0); }
+.nav-tab .tab-icon { 
+  font-size: 20px; margin-bottom: 4px; 
+  transition: transform 0.5s var(--spring-bouncy); 
+  will-change: transform;
+}
+.nav-tab .tab-text { font-size: 9px; font-weight: 700; transition: color 0.3s; letter-spacing: -0.3px;}
 
-/* ── Páginas y Animaciones ── */
-.page { display:none; opacity:0; }
-.page.active { display:block; animation: springUp 0.6s var(--spring) forwards; }
-
-@keyframes springUp {
-  0% { opacity: 0; transform: translateY(40px) scale(0.95); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+/* Estado Activo (Levita y Brilla) */
+.nav-tab.active { 
+  background: #ffffff; color: #000000; 
+  box-shadow: 0 8px 20px rgba(255,255,255,0.25); 
+  transform: translate3d(0, -2px, 0);
+}
+.nav-tab.active .tab-text { color: #000000; }
+.nav-tab.active .tab-icon { 
+  transform: scale(1.25) translate3d(0, -2px, 0); 
+  text-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* ── Tarjetas Estilo Glass Ovaladas ── */
-.summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+/* ── TRANSICIÓN DE PÁGINAS ── */
+.page { display:none; opacity:0; will-change: transform, opacity; }
+.page.active { display:block; animation: pageAppear 0.5s var(--spring-smooth) forwards; }
+@keyframes pageAppear {
+  0% { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.98); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* ── TARJETAS (CARDS PERFECTAMENTE ALINEADAS) ── */
+.summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
 
 .card {
-  background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border); border-radius: var(--radius-card);
-  padding: 24px; transition: transform 0.3s var(--spring);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-highlight);
-  display: flex; flex-direction: column; justify-content: center;
+  padding: 24px; transition: transform 0.2s var(--press-effect);
+  display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-highlight);
 }
-.card:active { transform: scale(0.95); }
-.card.wide { grid-column:1/-1; }
+.card:active { transform: scale(0.96); }
+.card.wide { grid-column:1/-1; align-items: flex-start; text-align: left; }
 
-.card-label { font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
-.card-value { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1; }
+.card-label { font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; width:100%;}
+.card-value { font-size:26px; font-weight:800; line-height:1; letter-spacing:-0.5px;}
+.card.wide .card-value { font-size:34px; }
 .card-sub { font-size:12px; color:var(--text-muted); margin-top:8px; font-weight:500;}
 
-.card.income  { border-top: 2px solid var(--green); }  .card.income  .card-value { color:var(--green); text-shadow: 0 0 15px rgba(0,229,160,0.3); }
-.card.expense { border-top: 2px solid var(--red); }    .card.expense .card-value { color:var(--red); text-shadow: 0 0 15px rgba(255,79,106,0.3); }
+.card.income  { border-top: 2px solid var(--green); }  .card.income  .card-value { color:var(--green); text-shadow: 0 0 12px rgba(0,229,160,0.2); }
+.card.expense { border-top: 2px solid var(--red); }    .card.expense .card-value { color:var(--red); text-shadow: 0 0 12px rgba(255,79,106,0.2);}
 .card.spendable{ border-top: 2px solid var(--blue); }  .card.spendable .card-value { color:var(--blue); }
 .card.savings  { border-top: 2px solid var(--gold); }  .card.savings  .card-value { color:var(--gold); }
 .card.lent     { border-top: 2px solid var(--orange); }.card.lent   .card-value { color:var(--orange); }
 .card.owed     { border-top: 2px solid var(--purple); }.card.owed  .card-value { color:var(--purple); }
 
-.savings-bar-wrap { margin-top:16px; background: rgba(0,0,0,0.4); border-radius:var(--radius-pill); height:8px; overflow:hidden; border: 1px solid rgba(255,255,255,0.05); }
-.savings-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:var(--radius-pill); transition:width 1.2s var(--spring); width:0%; box-shadow: 0 0 10px rgba(0,229,160,0.5); }
+.savings-bar-wrap { margin-top:14px; width:100%; background: rgba(0,0,0,0.5); border-radius:var(--radius-pill); height:8px; overflow:hidden; border: 1px solid rgba(255,255,255,0.05);}
+.savings-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:var(--radius-pill); transition:width 1s var(--spring-smooth); width:0%; }
 
-/* ── Formularios Ovalados ── */
+/* ── FORMULARIOS Y BOTONES (ALINEACIÓN ABSOLUTA) ── */
 .form-section {
-  background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border); border-radius: var(--radius-card);
-  padding: 24px; margin-bottom:16px; box-shadow: 0 12px 32px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-highlight);
+  padding: 24px; margin-bottom:20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
 }
-.form-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:10px;}
+.form-title { font-size:18px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:8px;}
 
-.type-toggle { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+/* Botones de selección */
+.type-toggle { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
 .type-btn {
   padding:14px; border-radius:var(--radius-pill); border:1px solid var(--glass-border);
-  background: rgba(0,0,0,0.3); color:var(--text-muted);
-  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700;
-  cursor:pointer; transition:all 0.4s var(--spring); 
+  background: var(--input-bg); color:var(--text-muted);
+  font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;
+  cursor:pointer; transition:all 0.3s var(--spring-bouncy); 
 }
 .type-btn:active { transform:scale(0.92); }
-.type-btn.active-income  { background:var(--green-dim);  border-color:var(--green);  color:var(--green); box-shadow: 0 4px 12px rgba(0,229,160,0.2);}
-.type-btn.active-expense { background:var(--red-dim);    border-color:var(--red);    color:var(--red); box-shadow: 0 4px 12px rgba(255,79,106,0.2);}
+.type-btn.active-income  { background:var(--green-dim); border-color:var(--green); color:var(--green); box-shadow:0 4px 12px rgba(0,229,160,0.1);}
+.type-btn.active-expense { background:var(--red-dim); border-color:var(--red); color:var(--red); box-shadow:0 4px 12px rgba(255,79,106,0.1);}
 
 .input-group { margin-bottom:16px; }
-.input-label { font-size:12px; font-weight:700; margin-left:4px; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; display:block; }
+.input-label { font-size:12px; font-weight:700; margin-left:12px; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; display:block; }
 
-.amount-row { display:flex; gap:10px; }
-.currency-toggle { display:flex; background: rgba(0,0,0,0.4); border:1px solid var(--glass-border); border-radius:var(--radius-pill); overflow:hidden; flex-shrink:0; padding:4px;}
-.cur-btn { padding:0 16px; background:none; border:none; border-radius:var(--radius-pill); color:var(--text-muted); font-family:'Syne',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.3s; }
+/* Fila de Input de Monto PERFECTA */
+.amount-row { 
+  display:flex; flex-direction:row; align-items:center; gap:8px; 
+  background: var(--input-bg); border:1px solid var(--glass-border); 
+  border-radius:var(--radius-pill); padding:4px;
+  transition: border-color 0.3s;
+}
+.amount-row:focus-within { border-color:var(--glass-highlight); background: rgba(255,255,255,0.05); }
+
+.currency-toggle { display:flex; background:rgba(0,0,0,0.4); border-radius:var(--radius-pill); padding:2px; flex-shrink:0;}
+.cur-btn { 
+  padding:10px 16px; background:none; border:none; border-radius:var(--radius-pill); 
+  color:var(--text-muted); font-size:13px; font-weight:800; 
+  cursor:pointer; transition:all 0.3s; display:flex; align-items:center; justify-content:center;
+}
 .cur-btn.active { background:var(--gold); color:#000; }
 
-.amount-input-wrap { position:relative; flex:1; }
-.amount-prefix { position:absolute; left:20px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:16px; pointer-events:none; font-family:'Syne',sans-serif; font-weight:700; }
-
-input {
-  width:100%; background: rgba(0,0,0,0.3); border:1px solid var(--glass-border);
-  border-radius:var(--radius-pill); padding:16px 20px; color:var(--text);
-  font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600; outline:none;
-  transition:all 0.3s var(--smooth); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+.amount-input-wrap { position:relative; flex:1; display:flex; align-items:center; height:100%;}
+.amount-prefix { 
+  position:absolute; left:12px; color:var(--text-muted); font-size:18px; font-weight:800; 
+  pointer-events:none; display:flex; align-items:center; justify-content:center; height:100%;
 }
-input:focus { border-color:var(--border-focus); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 4px rgba(255,255,255,0.05), inset 0 2px 4px rgba(0,0,0,0.2); }
-input::placeholder { color: rgba(255,255,255,0.3); }
-input.with-prefix { padding-left:48px; font-family:'Syne', sans-serif; font-weight:700; font-size: 18px; }
 
-.conversion-preview { font-size:12px; font-weight:700; color:var(--text-muted); margin-top:8px; margin-left: 10px; min-height:16px; transition:all 0.3s; }
+/* Inputs Nativos Limpios */
+input {
+  width:100%; background: transparent; border:none; -webkit-appearance: none; appearance: none;
+  color:var(--text); font-size:16px; font-weight:600; outline:none;
+  padding:14px 16px; transition:all 0.3s; margin:0; line-height:normal;
+}
+input.with-prefix { padding-left:40px; font-size: 22px; font-weight:800; letter-spacing: -0.5px;}
+input::placeholder { color: rgba(255,255,255,0.3); font-weight:500; font-family:'DM Sans', sans-serif;}
+
+.standalone-input {
+  background: var(--input-bg); border:1px solid var(--glass-border); border-radius:var(--radius-pill);
+  padding:16px 20px; font-size:15px; font-weight:600;
+}
+.standalone-input:focus { border-color:var(--glass-highlight); background:rgba(255,255,255,0.05); }
+
+.conversion-preview { font-size:12px; font-weight:700; color:var(--text-muted); margin-top:6px; margin-left: 12px; min-height:16px; transition:all 0.3s; }
 .conversion-preview.active { color:var(--gold); }
 
+/* Botón Principal */
 .add-btn {
   width:100%; padding:18px; border-radius:var(--radius-pill); border:none;
-  font-family:'Syne',sans-serif; font-size:16px; font-weight:800; letter-spacing:0.5px;
-  cursor:pointer; transition:all 0.3s var(--spring); margin-top:10px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  font-size:16px; font-weight:800; letter-spacing:0.5px; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  cursor:pointer; transition:all 0.3s var(--press-effect); margin-top:12px;
 }
-.add-btn:active { transform:scale(0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-.add-btn.btn-income  { background:var(--green);  color:#000; }
-.add-btn.btn-expense { background:var(--red);    color:#fff; }
-.add-btn.btn-lent    { background:var(--orange); color:#000; }
-.add-btn.btn-owed    { background:var(--purple); color:#000; }
-.add-btn.btn-buy     { background:var(--blue);   color:#fff; }
+.add-btn:active { transform:scale(0.96) translate3d(0,2px,0); }
+.add-btn.btn-income  { background:var(--green);  color:#000; box-shadow: 0 8px 24px rgba(0,229,160,0.25); }
+.add-btn.btn-expense { background:var(--red);    color:#fff; box-shadow: 0 8px 24px rgba(255,79,106,0.25); }
+.add-btn.btn-lent    { background:var(--orange); color:#000; box-shadow: 0 8px 24px rgba(255,156,64,0.25); }
+.add-btn.btn-owed    { background:var(--purple); color:#000; box-shadow: 0 8px 24px rgba(181,123,255,0.25); }
+.add-btn.btn-buy     { background:var(--blue);   color:#fff; box-shadow: 0 8px 24px rgba(91,143,255,0.25); }
 
-/* ── Historial y Listas ── */
+/* ── TASA DE CAMBIO ── */
+.rate-section {
+  background: var(--glass-bg); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border); border-radius: var(--radius-card);
+  padding: 20px; margin-bottom:20px; 
+}
+.rate-toggle-box { display:flex; background: var(--input-bg); border-radius:var(--radius-pill); padding:4px; margin-bottom:16px; border:1px solid var(--glass-border); }
+.rate-toggle-box button { flex:1; padding:10px; border-radius:var(--radius-pill); border:none; background:none; color:var(--text-muted); font-weight:700; font-size:13px; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; justify-content:center;}
+.rate-toggle-box button.active { background:var(--text); color:#000; }
+
+/* ── HISTORIAL Y LISTAS ── */
 .history-header {
-  font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
-  color:var(--text); margin: 28px 0 16px;
+  font-size:18px; font-weight:800; letter-spacing:-0.5px;
+  color:var(--text); margin: 32px 0 16px; padding: 0 4px;
   display:flex; align-items:center; justify-content:space-between;
 }
 .clear-btn {
   font-size:12px; font-weight:700; color:var(--text-muted); background:var(--glass-bg);
   border:1px solid var(--glass-border); border-radius:var(--radius-pill); padding:8px 16px;
-  cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.4s var(--spring);
+  cursor:pointer; transition:all 0.3s var(--press-effect); display:flex; align-items:center; justify-content:center;
 }
 .clear-btn:active { transform: scale(0.9); background:var(--red-dim); color:var(--red); border-color:var(--red);}
 
 .tx-list { display:flex; flex-direction:column; gap:12px; }
 
 .tx-item {
-  background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border); border-radius: 28px; padding: 16px 20px;
+  background: var(--glass-bg); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border); border-radius: 26px; padding: 16px 20px;
   display: flex; align-items: center; gap: 16px;
-  animation: slideInCascade 0.5s var(--spring) both;
-  transition: transform 0.3s var(--spring), background 0.3s;
+  animation: slideInCascade 0.5s var(--spring-smooth) both;
+  transition: transform 0.2s var(--press-effect);
 }
-.tx-item:active { transform: scale(0.96); background: var(--glass-hover); }
+.tx-item:active { transform: scale(0.97); }
 
 @keyframes slideInCascade {
-  from { opacity: 0; transform: translateX(-30px) scale(0.95); }
-  to   { opacity: 1; transform: translateX(0) scale(1); }
+  from { opacity: 0; transform: translate3d(-20px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
-.tx-icon { width:48px; height:48px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; font-weight: 800; font-family: 'Syne', sans-serif;}
+.tx-icon { width:46px; height:46px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; font-weight: 800; }
 .tx-icon.income  { background:var(--green-dim); color:var(--green); }
 .tx-icon.expense { background:var(--red-dim); color:var(--red); }
 .tx-icon.buy     { background:var(--blue-dim); color:var(--blue); }
 
-.tx-info { flex:1; min-width:0; }
-.tx-desc { font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.tx-date { font-size:12px; font-weight:500; color:var(--text-muted); margin-top:4px; }
-.tx-right { display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0; gap:4px; }
-.tx-amount { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
+.tx-info { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center;}
+.tx-desc { font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.2px;}
+.tx-date { font-size:12px; font-weight:500; color:var(--text-muted); margin-top:2px; }
+.tx-right { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; flex-shrink:0; gap:2px; }
+.tx-amount { font-size:18px; font-weight:800; letter-spacing:-0.5px;}
 .tx-amount.income  { color:var(--green); }
 .tx-amount.expense { color:var(--red); }
 .tx-original { font-size:11px; font-weight:700; color:var(--gold); }
-.tx-delete { background:rgba(255,255,255,0.08); border:none; color:var(--text-muted); cursor:pointer; width:32px; height:32px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:16px; transition:all 0.3s var(--spring); flex-shrink:0; }
-.tx-delete:active { transform:scale(0.7); background:var(--red); color:#fff; }
+.tx-delete { background:rgba(255,255,255,0.08); border:none; color:var(--text-muted); cursor:pointer; width:34px; height:34px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.3s var(--press-effect); flex-shrink:0; }
+.tx-delete:active { transform:scale(0.8); background:var(--red); color:#fff; }
 
-/* ── Gráficos ── */
-.chart-container {
-  background: var(--glass-bg); backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border); border-radius: var(--radius-card);
-  padding: 24px; margin-bottom: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.2);
-  animation: slideInCascade 0.6s var(--spring) both;
-}
-.chart-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; text-align:center; margin-bottom:20px; color:#fff; }
-canvas { width: 100% !important; max-height: 250px; }
-
-/* ── Calculadora (Glass) ── */
-.calc-display {
-  background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
-  border-radius: var(--radius-card); padding: 24px 32px; margin-bottom: 20px;
-  text-align: right; min-height: 120px; display: flex; flex-direction: column; justify-content: center;
-  box-shadow: inset 0 8px 32px rgba(0,0,0,0.4);
-}
-.calc-screen { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; color: #fff; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; letter-spacing: -1px;}
-.calc-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-}
-.calc-btn {
-  background: var(--glass-bg); border: 1px solid var(--glass-border);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-radius: var(--radius-circle); padding: 0; aspect-ratio: 1/1; /* Botones circulares perfectos */
-  color: #fff; font-family: 'DM Sans', sans-serif; font-size: 24px; font-weight: 700;
-  cursor: pointer; transition: all 0.4s var(--spring); display: flex; justify-content: center; align-items: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15), inset 0 1px 0 var(--glass-highlight);
-}
-.calc-btn:active { transform: scale(0.8); background: rgba(255,255,255,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-.calc-btn.op { color: var(--teal); background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.2); }
-.calc-btn.equal { background: var(--teal); color: #000; border-radius: var(--radius-pill); grid-column: span 2; aspect-ratio: auto; }
-.calc-btn.clear { color: var(--red); background: rgba(255,79,106,0.1); }
-
-/* ── Filtros (Pills) ── */
-.filter-tabs { display:flex; gap:10px; margin-bottom:20px; }
+/* ── FILTROS PILLS ── */
+.filter-tabs { display:flex; gap:8px; margin-bottom:20px; }
 .filter-tab {
   flex:1; padding:12px; border-radius:var(--radius-pill); border:1px solid var(--glass-border);
-  background:rgba(0,0,0,0.3); color:var(--text-muted); font-family:'DM Sans',sans-serif;
-  font-size:13px; font-weight:700; cursor:pointer; transition:all 0.4s var(--spring); text-align:center;
+  background:var(--input-bg); color:var(--text-muted); font-size:13px; font-weight:700; 
+  cursor:pointer; transition:all 0.4s var(--spring-bouncy); display:flex; align-items:center; justify-content:center;
 }
-.filter-tab.active-all    { background:#fff; color:#000; border-color:#fff; transform: scale(1.05);}
-.filter-tab.active-pending{ background:var(--orange); color:#000; border-color:var(--orange); transform: scale(1.05);}
-.filter-tab.active-paid   { background:var(--green);  color:#000; border-color:var(--green); transform: scale(1.05);}
+.filter-tab.active-all    { background:#fff; color:#000; border-color:#fff;}
+.filter-tab.active-pending{ background:var(--orange); color:#000; border-color:var(--orange);}
+.filter-tab.active-paid   { background:var(--green);  color:#000; border-color:var(--green);}
 
-/* ── Toast ── */
-.toast {
-  position:fixed; top:40px; left:50%; transform:translateX(-50%) translateY(-100px) scale(0.8);
-  background:rgba(20,20,30,0.95); backdrop-filter:blur(30px); border:1px solid var(--glass-border);
-  border-radius:var(--radius-pill); padding:16px 32px; font-size:15px; font-weight:700;
-  box-shadow:0 16px 40px rgba(0,0,0,0.5); z-index:9999; 
-  transition:all 0.6s var(--spring); white-space:nowrap; opacity:0;
+/* ── GRÁFICOS ── */
+.chart-container {
+  background: var(--glass-bg); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border); border-radius: var(--radius-card);
+  padding: 24px; margin-bottom: 20px;
 }
-.toast.show { transform:translateX(-50%) translateY(0) scale(1); opacity:1; }
+.chart-title { font-size:18px; font-weight:800; text-align:center; margin-bottom:20px; color:#fff; letter-spacing:-0.5px;}
+canvas { width: 100% !important; max-height: 240px; }
+
+/* ── CALCULADORA (Alineación Perfecta) ── */
+.calc-display {
+  background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card); padding: 24px 28px; margin-bottom: 20px;
+  text-align: right; min-height: 110px; display: flex; flex-direction: column; justify-content: center;
+  box-shadow: inset 0 8px 24px rgba(0,0,0,0.5);
+}
+.calc-screen { font-size: 48px; font-weight: 800; color: #fff; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; letter-spacing: -1px; line-height:1;}
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.calc-btn {
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-circle); padding: 0; aspect-ratio: 1/1; 
+  color: #fff; font-size: 26px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s var(--press-effect); display: flex; justify-content: center; align-items: center;
+  -webkit-appearance: none;
+}
+.calc-btn:active { transform: scale(0.8); background: rgba(255,255,255,0.15); }
+.calc-btn.op { color: var(--teal); background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.2); }
+.calc-btn.equal { background: var(--teal); color: #000; border-radius: var(--radius-pill); grid-column: span 2; aspect-ratio: auto; }
+.calc-btn.clear { color: var(--red); background: rgba(255,79,106,0.1); border-color: rgba(255,79,106,0.2);}
+
+/* ── TOAST (Notificaciones Nativas) ── */
+.toast {
+  position:fixed; top:20px; left:50%; transform:translate3d(-50%, -100px, 0) scale(0.9);
+  background:rgba(25,25,35,0.98); backdrop-filter:blur(24px); border:1px solid var(--glass-border);
+  border-radius:var(--radius-pill); padding:16px 28px; font-size:14px; font-weight:700;
+  box-shadow:0 12px 32px rgba(0,0,0,0.6); z-index:9999; 
+  transition:all 0.5s var(--spring-bouncy); white-space:nowrap; opacity:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.toast.show { transform:translate3d(-50%, 0, 0) scale(1); opacity:1; }
 .toast.green  { color:var(--green); border-bottom: 3px solid var(--green); }
 .toast.red    { color:var(--red); border-bottom: 3px solid var(--red); }
 .toast.orange { color:var(--orange); border-bottom: 3px solid var(--orange); }
@@ -316,46 +371,69 @@ canvas { width: 100% !important; max-height: 250px; }
 </style>
 </head>
 <body>
-<!-- Orbes de fondo animados -->
+<!-- Orbes Ultra Fluidos -->
 <div class="bg-orb orb-1"></div>
 <div class="bg-orb orb-2"></div>
 
 <div class="app">
 
   <header>
-    <div class="logo">Finanzas <span>Gabriel</span></div>
+    <div class="logo syne-font">Finanzas <span>Gabriel</span></div>
     <div class="date-badge" id="dateDisplay"></div>
   </header>
 
-  <!-- ══════════════ FINANZAS ══════════════ -->
+  <!-- ══════════════ FINANZAS (INICIO) ══════════════ -->
   <div class="page active" id="pageFin">
     <div class="summary-grid">
       <div class="card income">
         <div class="card-label">Ingresos</div>
-        <div class="card-value" id="totalIncome">$ 0</div>
+        <div class="card-value syne-font" id="totalIncome">$ 0</div>
       </div>
       <div class="card expense">
         <div class="card-label">Egresos</div>
-        <div class="card-value" id="totalExpense">$ 0</div>
+        <div class="card-value syne-font" id="totalExpense">$ 0</div>
       </div>
       <div class="card spendable wide">
-        <div class="card-label">Dinero Líquido para Gastar (60%)</div>
-        <div class="card-value" id="spendable" style="font-size:36px;">$ 0</div>
+        <div class="card-label">Líquido para Gastar (60%)</div>
+        <div class="card-value syne-font" id="spendable">$ 0</div>
       </div>
       <div class="card savings wide">
         <div class="card-label">Fondo de Ahorro (40%)</div>
-        <div class="card-value" id="savings">$ 0</div>
+        <div class="card-value syne-font" id="savings">$ 0</div>
         <div class="savings-bar-wrap"><div class="savings-bar" id="savingsBar"></div></div>
-        <div class="card-sub" id="savingsPercent" style="text-align:right;">0%</div>
+        <div class="card-sub" id="savingsPercent" style="text-align:right; margin-top:6px; font-weight:700;">0%</div>
       </div>
     </div>
 
+    <!-- TASA USD -->
+    <div class="rate-section" id="rateSection">
+      <div class="card-label" style="margin-bottom:12px;">Tasa de Cambio (USD → COP)</div>
+      <div class="rate-toggle-box">
+        <button class="active" id="srcManual" onclick="setRateSource('manual')">Manual</button>
+        <button id="srcAuto" onclick="setRateSource('auto')">Automática</button>
+      </div>
+      
+      <div id="manualRateRow" style="display:flex; gap:10px;">
+        <div class="amount-row" style="flex:1;">
+          <span class="amount-prefix" style="font-size:13px; left:16px;">1 USD=</span>
+          <input type="text" id="rateInput" placeholder="4200" inputmode="numeric" class="with-prefix" style="padding-left:70px; font-size:16px;" />
+        </div>
+        <button class="add-btn btn-income syne-font" style="width:auto; margin:0; padding:0 24px; font-size:14px;" onclick="applyManualRate()">OK</button>
+      </div>
+      
+      <div id="autoRateRow" style="display:none;">
+        <button class="add-btn btn-income syne-font" style="margin:0; font-size:14px;" onclick="fetchRate()">Obtener Tasa Actual</button>
+      </div>
+      <div class="conversion-preview" id="rateHint" style="margin-left:8px; margin-top:10px;">Configura para añadir en dólares</div>
+    </div>
+
     <div class="form-section">
-      <div class="form-title">⚡ Nuevo Movimiento</div>
+      <div class="form-title syne-font">⚡ Nuevo Movimiento</div>
       <div class="type-toggle">
         <button class="type-btn active-income" id="btnIncome" onclick="setType('income')">↑ Ingreso</button>
         <button class="type-btn" id="btnExpense" onclick="setType('expense')">↓ Egreso</button>
       </div>
+      
       <div class="input-group">
         <label class="input-label">Monto</label>
         <div class="amount-row">
@@ -364,20 +442,21 @@ canvas { width: 100% !important; max-height: 250px; }
             <button class="cur-btn" id="curUSD" onclick="setCurrency('USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="amountPrefix">$</span>
-            <input type="text" id="amountInput" class="with-prefix" placeholder="0" inputmode="numeric" />
+            <span class="amount-prefix syne-font" id="amountPrefix">$</span>
+            <input type="text" id="amountInput" class="with-prefix syne-font" placeholder="0" inputmode="numeric" />
           </div>
         </div>
         <div class="conversion-preview" id="conversionPreview"></div>
       </div>
+      
       <div class="input-group">
         <label class="input-label" id="reasonLabel">Motivo</label>
-        <input type="text" id="reasonInput" placeholder="ej: salario, comida..." maxlength="40" />
+        <input type="text" id="reasonInput" class="standalone-input" placeholder="Ej: Salario, mercado, salida..." maxlength="40" />
       </div>
-      <button class="add-btn btn-income" id="addBtn" onclick="addTransaction()">Guardar Movimiento</button>
+      <button class="add-btn btn-income syne-font" id="addBtn" onclick="addTransaction()">Guardar Movimiento</button>
     </div>
 
-    <div class="history-header">Historial <button class="clear-btn" onclick="clearAll()">Borrar Todo</button></div>
+    <div class="history-header syne-font">Historial <button class="clear-btn" onclick="clearAll()">Borrar Todo</button></div>
     <div class="tx-list" id="txList"></div>
   </div>
 
@@ -385,16 +464,16 @@ canvas { width: 100% !important; max-height: 250px; }
   <div class="page" id="pageLent">
     <div class="summary-grid">
       <div class="card lent wide">
-        <div class="card-label">Préstamos Emitidos (Dinero en la calle)</div>
-        <div class="card-value" id="totalLent">$ 0</div>
-        <div class="card-sub" id="lentPendingCount">0 personas pendientes</div>
+        <div class="card-label">En la calle (Préstamos)</div>
+        <div class="card-value syne-font" id="totalLent">$ 0</div>
+        <div class="card-sub" id="lentPendingCount">0 pendientes</div>
       </div>
     </div>
     <div class="form-section">
-      <div class="form-title">📤 Registrar Préstamo</div>
+      <div class="form-title syne-font">📤 Prestar Dinero</div>
       <div class="input-group">
         <label class="input-label">¿A quién le prestaste?</label>
-        <input type="text" id="lentPerson" placeholder="Nombre de la persona" maxlength="30" />
+        <input type="text" id="lentPerson" class="standalone-input" placeholder="Nombre" maxlength="30" />
       </div>
       <div class="input-group">
         <label class="input-label">Monto</label>
@@ -404,134 +483,135 @@ canvas { width: 100% !important; max-height: 250px; }
             <button class="cur-btn" id="lentCurUSD" onclick="setLoanCurrency('lent','USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="lentAmountPrefix">$</span>
-            <input type="text" id="lentAmount" class="with-prefix" placeholder="0" inputmode="numeric" />
+            <span class="amount-prefix syne-font" id="lentAmountPrefix">$</span>
+            <input type="text" id="lentAmount" class="with-prefix syne-font" placeholder="0" inputmode="numeric" />
           </div>
         </div>
         <div class="conversion-preview" id="lentConvPreview"></div>
       </div>
-      <button class="add-btn btn-lent" onclick="addLoan('lent')">Prestar Dinero</button>
+      <button class="add-btn btn-lent syne-font" onclick="addLoan('lent')">Registrar Préstamo</button>
     </div>
     <div class="filter-tabs" id="lentFilterTabs">
       <button class="filter-tab active-all" onclick="setLoanFilter('lent','all')">Todos</button>
-      <button class="filter-tab" onclick="setLoanFilter('lent','pending')">Pendiente</button>
-      <button class="filter-tab" onclick="setLoanFilter('lent','paid')">Pagado</button>
+      <button class="filter-tab" onclick="setLoanFilter('lent','pending')">Pendientes</button>
+      <button class="filter-tab" onclick="setLoanFilter('lent','paid')">Pagados</button>
     </div>
     <div class="tx-list" id="lentList"></div>
   </div>
 
-  <!-- ══════════════ ME DEBEN (CORREGIDO) ══════════════ -->
+  <!-- ══════════════ ME DEBEN ══════════════ -->
   <div class="page" id="pageOwed">
     <div class="summary-grid">
       <div class="card owed wide">
-        <div class="card-label">Cuentas por Cobrar (Dinero a mi favor)</div>
-        <div class="card-value" id="totalOwed">$ 0</div>
-        <div class="card-sub" id="owedPendingCount">0 personas pendientes</div>
+        <div class="card-label">Cuentas por Cobrar (Me deben)</div>
+        <div class="card-value syne-font" id="totalOwed">$ 0</div>
+        <div class="card-sub" id="owedPendingCount">0 pendientes</div>
       </div>
     </div>
     <div class="form-section">
-      <div class="form-title">📥 Añadir Deuda a mi Favor</div>
+      <div class="form-title syne-font">📥 Añadir Deuda a mi Favor</div>
       <div class="input-group">
-        <label class="input-label">¿Quién te debe dinero?</label>
-        <input type="text" id="owedPerson" placeholder="Nombre del deudor" maxlength="30" />
+        <label class="input-label">¿Quién te debe?</label>
+        <input type="text" id="owedPerson" class="standalone-input" placeholder="Nombre" maxlength="30" />
       </div>
       <div class="input-group">
-        <label class="input-label">Monto de la deuda</label>
+        <label class="input-label">Monto</label>
         <div class="amount-row">
           <div class="currency-toggle">
             <button class="cur-btn active" id="owedCurCOP" onclick="setLoanCurrency('owed','COP')">COP</button>
             <button class="cur-btn" id="owedCurUSD" onclick="setLoanCurrency('owed','USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="owedAmountPrefix">$</span>
-            <input type="text" id="owedAmount" class="with-prefix" placeholder="0" inputmode="numeric" />
+            <span class="amount-prefix syne-font" id="owedAmountPrefix">$</span>
+            <input type="text" id="owedAmount" class="with-prefix syne-font" placeholder="0" inputmode="numeric" />
           </div>
         </div>
         <div class="conversion-preview" id="owedConvPreview"></div>
       </div>
-      <button class="add-btn btn-owed" onclick="addLoan('owed')">Registrar Deuda a mi favor</button>
+      <button class="add-btn btn-owed syne-font" onclick="addLoan('owed')">Registrar Deuda</button>
     </div>
     <div class="filter-tabs" id="owedFilterTabs">
       <button class="filter-tab active-all" onclick="setLoanFilter('owed','all')">Todos</button>
-      <button class="filter-tab" onclick="setLoanFilter('owed','pending')">Por Cobrar</button>
-      <button class="filter-tab" onclick="setLoanFilter('owed','paid')">Ya me Pagaron</button>
+      <button class="filter-tab" onclick="setLoanFilter('owed','pending')">Pendientes</button>
+      <button class="filter-tab" onclick="setLoanFilter('owed','paid')">Ya Pagaron</button>
     </div>
     <div class="tx-list" id="owedList"></div>
   </div>
 
   <!-- ══════════════ DESEOS ══════════════ -->
   <div class="page" id="pageBuy">
-    <div class="card spendable wide" style="margin-bottom:16px;">
+    <div class="card spendable wide" style="margin-bottom:20px;">
       <div class="card-label">Saldo Líquido Actual</div>
-      <div class="card-value" id="buyCurrentBalance">$ 0</div>
+      <div class="card-value syne-font" id="buyCurrentBalance">$ 0</div>
     </div>
     <div class="form-section">
-      <div class="form-title">🛒 Añadir Meta de Compra</div>
+      <div class="form-title syne-font">🛒 Añadir Meta de Compra</div>
       <div class="input-group">
-        <input type="text" id="buyItemName" placeholder="¿Qué tienes en la mira?" maxlength="40" />
+        <label class="input-label">¿Qué vas a comprar?</label>
+        <input type="text" id="buyItemName" class="standalone-input" placeholder="Ej: Ropa, proteína..." maxlength="40" />
       </div>
       <div class="input-group">
+        <label class="input-label">Precio estimado</label>
         <div class="amount-row">
           <div class="currency-toggle">
             <button class="cur-btn active" id="buyCurCOP" onclick="setBuyCurrency('COP')">COP</button>
             <button class="cur-btn" id="buyCurUSD" onclick="setBuyCurrency('USD')">USD</button>
           </div>
           <div class="amount-input-wrap">
-            <span class="amount-prefix" id="buyAmountPrefix">$</span>
-            <input type="text" id="buyPrice" class="with-prefix" placeholder="Precio estimado" inputmode="numeric" />
+            <span class="amount-prefix syne-font" id="buyAmountPrefix">$</span>
+            <input type="text" id="buyPrice" class="with-prefix syne-font" placeholder="0" inputmode="numeric" />
           </div>
         </div>
         <div class="conversion-preview" id="buyConvPreview"></div>
       </div>
-      <button class="add-btn btn-buy" onclick="addWishlistItem()">Agregar Meta</button>
+      <button class="add-btn btn-buy syne-font" onclick="addWishlistItem()">Agregar Meta</button>
     </div>
-    <div class="history-header">Lista de Deseos</div>
+    <div class="history-header syne-font">Lista de Deseos</div>
     <div class="tx-list" id="wishlistContainer"></div>
   </div>
 
   <!-- ══════════════ GRÁFICOS ══════════════ -->
   <div class="page" id="pageGraph">
     <div class="chart-container">
-      <div class="chart-title">Flujo de Caja</div>
+      <div class="chart-title syne-font">Flujo de Caja</div>
       <canvas id="barChart"></canvas>
     </div>
     <div class="chart-container">
-      <div class="chart-title">Distribución de Activos</div>
+      <div class="chart-title syne-font">Distribución de Activos</div>
       <canvas id="doughnutChart"></canvas>
     </div>
   </div>
 
   <!-- ══════════════ TOTAL ══════════════ -->
   <div class="page" id="pageCalc">
-    <div class="card total-wealth wide" style="margin-bottom:24px; border-top:2px solid var(--teal);">
+    <div class="card wide" style="margin-bottom:20px; border-top:2px solid var(--teal);">
       <div class="card-label" style="color:var(--text);">Patrimonio Neto Proyectado</div>
-      <div class="card-value" id="calcTotal" style="font-size:38px; text-shadow:0 0 25px rgba(0,212,255,0.5);">$ 0</div>
-      <div class="card-sub">Si cobras todos los préstamos y deudas a tu favor hoy</div>
+      <div class="card-value syne-font" id="calcTotal" style="color:var(--teal); text-shadow:0 0 20px rgba(0,212,255,0.4);">$ 0</div>
+      <div class="card-sub">Si te pagan todas tus deudas hoy</div>
     </div>
-
     <div class="tx-list">
-      <div class="tx-item">
+      <div class="tx-item" style="padding:20px;">
         <div class="tx-icon" style="background:var(--blue-dim); color:var(--blue);">💰</div>
-        <div class="tx-info"><div class="tx-desc">Saldo Real (En mano)</div></div>
-        <div class="tx-amount" id="calcBalance" style="color:var(--text);">$ 0</div>
+        <div class="tx-info"><div class="tx-desc">Saldo en mano</div></div>
+        <div class="tx-amount syne-font" id="calcBalance" style="color:var(--text);">$ 0</div>
       </div>
-      <div class="tx-item">
+      <div class="tx-item" style="padding:20px;">
         <div class="tx-icon" style="background:var(--orange-dim); color:var(--orange);">📤</div>
         <div class="tx-info"><div class="tx-desc">Préstamos emitidos</div></div>
-        <div class="tx-amount" id="calcLent" style="color:var(--orange);">$ 0</div>
+        <div class="tx-amount syne-font" id="calcLent" style="color:var(--orange);">$ 0</div>
       </div>
-      <div class="tx-item">
+      <div class="tx-item" style="padding:20px;">
         <div class="tx-icon" style="background:var(--purple-dim); color:var(--purple);">📥</div>
         <div class="tx-info"><div class="tx-desc">Cuentas por cobrar</div></div>
-        <div class="tx-amount" id="calcOwed" style="color:var(--purple);">$ 0</div>
+        <div class="tx-amount syne-font" id="calcOwed" style="color:var(--purple);">$ 0</div>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════ CALCULADORA INTEGRADA ══════════════ -->
+  <!-- ══════════════ CALCULADORA ══════════════ -->
   <div class="page" id="pageMath">
     <div class="calc-display">
-      <div class="calc-screen" id="mathScreen">0</div>
+      <div class="calc-screen syne-font" id="mathScreen">0</div>
     </div>
     <div class="calc-grid">
       <button class="calc-btn clear" onclick="mathAction('C')">C</button>
@@ -562,23 +642,37 @@ canvas { width: 100% !important; max-height: 250px; }
 
 </div>
 
-<!-- ── Dock Flotante (Navegación Móvil iOS Style) ── -->
+<!-- ── DOCK FLOTANTE (ANIMACIÓN FÍSICA) ── -->
 <div class="nav-dock-container">
   <div class="nav-dock" id="mainNav">
-    <div class="nav-tab active" onclick="showPage('fin', this)"><span class="tab-icon">💰</span> Inicio</div>
-    <div class="nav-tab" onclick="showPage('lent', this)"><span class="tab-icon">📤</span> Presté</div>
-    <div class="nav-tab" onclick="showPage('owed', this)"><span class="tab-icon">📥</span> Me deben</div>
-    <div class="nav-tab" onclick="showPage('buy', this)"><span class="tab-icon">🛒</span> Deseos</div>
-    <div class="nav-tab" onclick="showPage('graph', this)"><span class="tab-icon">📊</span> Análisis</div>
-    <div class="nav-tab" onclick="showPage('calc', this)"><span class="tab-icon">🧮</span> Total</div>
-    <div class="nav-tab" onclick="showPage('math', this)"><span class="tab-icon">📱</span> Calc</div>
+    <div class="nav-tab active" onclick="showPage('fin', this)">
+      <span class="tab-icon">💰</span><span class="tab-text">Inicio</span>
+    </div>
+    <div class="nav-tab" onclick="showPage('lent', this)">
+      <span class="tab-icon">📤</span><span class="tab-text">Presté</span>
+    </div>
+    <div class="nav-tab" onclick="showPage('owed', this)">
+      <span class="tab-icon">📥</span><span class="tab-text">Deudas</span>
+    </div>
+    <div class="nav-tab" onclick="showPage('buy', this)">
+      <span class="tab-icon">🛒</span><span class="tab-text">Deseos</span>
+    </div>
+    <div class="nav-tab" onclick="showPage('graph', this)">
+      <span class="tab-icon">📊</span><span class="tab-text">Gráficos</span>
+    </div>
+    <div class="nav-tab" onclick="showPage('calc', this)">
+      <span class="tab-icon">🧮</span><span class="tab-text">Total</span>
+    </div>
+    <div class="nav-tab" onclick="showPage('math', this)">
+      <span class="tab-icon">📱</span><span class="tab-text">Calc</span>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Estado ──
+// ── Estado Inicial ──
 let currentType = 'income'; let currentCurrency = 'COP'; let lentCurrency = 'COP';
 let owedCurrency = 'COP'; let buyCurrency = 'COP'; let usdRate = null;
 let currentPage = 'fin'; let loanFilter = { lent: 'all', owed: 'all' };
@@ -595,18 +689,18 @@ const dateOpts = { weekday:'long', day:'numeric', month:'short' };
 let today = new Date().toLocaleDateString('es-CO', dateOpts);
 document.getElementById('dateDisplay').textContent = today.charAt(0).toUpperCase() + today.slice(1);
 
-// ── Animación Números Fluida ──
+// ── Animación Números Fluida (60fps) ──
 const animatedElements = new Map();
 function animateValue(elId, newVal) {
   const el = document.getElementById(elId);
   if (!el) return;
   const startVal = animatedElements.has(elId) ? animatedElements.get(elId) : 0;
-  const duration = 1000;
+  const duration = 600;
   let startTime = null;
   const step = (timestamp) => {
     if (!startTime) startTime = timestamp;
     const progress = Math.min((timestamp - startTime) / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 5); 
+    const ease = 1 - Math.pow(1 - progress, 4); 
     const current = Math.floor(startVal + (newVal - startVal) * ease);
     el.textContent = fmt(current);
     if (progress < 1) window.requestAnimationFrame(step);
@@ -616,29 +710,26 @@ function animateValue(elId, newVal) {
   window.requestAnimationFrame(step);
 }
 
-// ── Navegación Fluida del Dock Flotante ──
+// ── NAVEGACIÓN DOCK (Física de Animación) ──
 function showPage(page, tabElement) {
   currentPage = page;
   document.querySelectorAll('.page').forEach(p => {
     p.classList.remove('active');
     if (p.id === 'page' + page.charAt(0).toUpperCase() + page.slice(1)) {
-      void p.offsetWidth; p.classList.add('active');
+      void p.offsetWidth; // Force reflow para re-animar
+      p.classList.add('active');
     }
   });
 
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  if (tabElement) {
-    tabElement.classList.add('active');
-    // Centrar automáticamente la pestaña en el dock al tocarla
-    tabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }
+  if (tabElement) tabElement.classList.add('active');
 
   if (page === 'calc') renderCalc();
   if (page === 'buy') renderWishlist();
   if (page === 'graph') renderGraphs();
 }
 
-// ── Utilidades Base ──
+// ── Utilidades ──
 function fmtCOP(n) { return Math.round(Math.abs(n)).toLocaleString('es-CO'); }
 function fmt(n) { return (n < 0 ? '- ' : '') + '$ ' + fmtCOP(Math.abs(n)); }
 function parseAmount(str) { return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0; }
@@ -654,74 +745,111 @@ function showToast(msg, type) {
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// ── Formateo en Vivo de Inputs ──
+// ── Tasa de Cambio ──
+function setRateSource(src) {
+  rateSource = src;
+  document.getElementById('srcManual').className = src==='manual' ? 'active' : '';
+  document.getElementById('srcAuto').className = src==='auto' ? 'active' : '';
+  document.getElementById('manualRateRow').style.display = src==='manual'?'flex':'none';
+  document.getElementById('autoRateRow').style.display = src==='auto'?'block':'none';
+}
+function applyManualRate() {
+  const raw = parseAmount(document.getElementById('rateInput').value);
+  if(raw<100){ showToast('⚠️ Tasa inválida','red'); return; }
+  usdRate = raw; 
+  document.getElementById('rateHint').textContent = `✅ 1 USD = ${fmtCOP(usdRate)} COP`;
+  document.getElementById('rateHint').style.color = 'var(--green)';
+  showToast('Tasa aplicada', 'green');
+}
+async function fetchRate() {
+  try {
+    document.getElementById('rateHint').textContent = 'Cargando...';
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const data = await res.json(); usdRate = data.rates['COP'];
+    document.getElementById('rateHint').textContent = `✅ 1 USD = ${fmtCOP(usdRate)} COP`;
+    document.getElementById('rateHint').style.color = 'var(--green)';
+    showToast('Tasa Auto-actualizada', 'green');
+  } catch(e) { showToast('Error de conexión', 'red'); }
+}
+
+// ── Formateo de Inputs ──
 function attachFormatter(id, curGetter) {
   const el = document.getElementById(id);
   if(!el) return;
   el.addEventListener('input', function(){
     const r = this.value.replace(/\D/g,'');
     this.value = r ? parseInt(r,10).toLocaleString('es-CO') : '';
+    const prevId = id==='amountInput'?'conversionPreview':id==='lentAmount'?'lentConvPreview':id==='owedAmount'?'owedConvPreview':'buyConvPreview';
+    const preview = document.getElementById(prevId);
+    if(curGetter()!=='USD' || !usdRate || !r){ preview.textContent=''; return; }
+    preview.textContent = `≈ $ ${fmtCOP(parseInt(r,10) * usdRate)} COP`;
+    preview.style.color = 'var(--gold)';
   });
 }
 attachFormatter('amountInput', ()=>currentCurrency); attachFormatter('lentAmount', ()=>lentCurrency);
 attachFormatter('owedAmount', ()=>owedCurrency); attachFormatter('buyPrice', ()=>buyCurrency);
 
-// ── Toggles Visuales ──
+// ── Toggles ──
 function setCurrency(cur){ currentCurrency=cur; toggleCurBtns('curCOP','curUSD',cur); document.getElementById('amountPrefix').textContent=cur==='USD'?'US$':'$'; }
 function setLoanCurrency(t,cur){ if(t==='lent'){lentCurrency=cur; toggleCurBtns('lentCurCOP','lentCurUSD',cur); document.getElementById('lentAmountPrefix').textContent=cur==='USD'?'US$':'$';} else {owedCurrency=cur; toggleCurBtns('owedCurCOP','owedCurUSD',cur); document.getElementById('owedAmountPrefix').textContent=cur==='USD'?'US$':'$';}}
 function setBuyCurrency(cur){ buyCurrency=cur; toggleCurBtns('buyCurCOP','buyCurUSD',cur); document.getElementById('buyAmountPrefix').textContent=cur==='USD'?'US$':'$'; }
 function toggleCurBtns(id1,id2,cur){ 
-  const b1 = document.getElementById(id1), b2 = document.getElementById(id2);
-  b1.className='cur-btn'+(cur==='COP'?' active':''); b2.className='cur-btn'+(cur==='USD'?' active':''); 
+  document.getElementById(id1).className='cur-btn'+(cur==='COP'?' active':''); 
+  document.getElementById(id2).className='cur-btn'+(cur==='USD'?' active':''); 
 }
 
 function setType(t){
-  currentType=t; document.getElementById('btnIncome').className='type-btn'+(t==='income'?' active-income':''); document.getElementById('btnExpense').className='type-btn'+(t==='expense'?' active-expense':'');
-  document.getElementById('addBtn').className='add-btn '+(t==='income'?'btn-income':'btn-expense');
+  currentType=t; 
+  document.getElementById('btnIncome').className='type-btn'+(t==='income'?' active-income':''); 
+  document.getElementById('btnExpense').className='type-btn'+(t==='expense'?' active-expense':'');
+  document.getElementById('addBtn').className='add-btn syne-font '+(t==='income'?'btn-income':'btn-expense');
 }
+
 function setLoanFilter(t,f){
   loanFilter[t]=f; const tabs = document.getElementById(t+'FilterTabs').querySelectorAll('.filter-tab');
-  tabs.forEach(tab => { tab.className='filter-tab'; tab.style.background='rgba(0,0,0,0.3)'; tab.style.color='var(--text-muted)'; tab.style.borderColor='var(--glass-border)'; });
+  tabs.forEach(tab => { tab.className='filter-tab'; });
   const act = f==='all'?tabs[0]:f==='pending'?tabs[1]:tabs[2];
   act.className='filter-tab active-'+f;
-  if(f==='all') { act.style.background='#fff'; act.style.color='#000'; act.style.borderColor='#fff'; }
-  else if (f==='pending') { act.style.background='var(--orange)'; act.style.color='#000'; act.style.borderColor='var(--orange)'; }
-  else { act.style.background='var(--green)'; act.style.color='#000'; act.style.borderColor='var(--green)'; }
   renderLoans();
 }
 
-// ── Creadores de Datos ──
+// ── Agregar Datos ──
 function addTransaction(){
   const raw = parseAmount(document.getElementById('amountInput').value); const reason = document.getElementById('reasonInput').value.trim();
   if(!raw){ showToast('⚠️ Ingresa un monto','red'); return; } if(!reason){ showToast('⚠️ Falta el motivo','red'); return; }
-  transactions.unshift({id:Date.now(), type:currentType, amount:raw, original:null, reason, date: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) });
-  save(); document.getElementById('amountInput').value=''; document.getElementById('reasonInput').value='';
+  let amt = raw, orig = null; if(currentCurrency==='USD'){ if(!usdRate){showToast('⚠️ Define la tasa de USD arriba','red');return;} amt=raw*usdRate; orig=`US$ ${fmtCOP(raw)}`; }
+  transactions.unshift({id:Date.now(), type:currentType, amount:amt, original:orig, reason, date: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) });
+  save(); document.getElementById('amountInput').value=''; document.getElementById('reasonInput').value=''; document.getElementById('conversionPreview').textContent='';
   showToast('✅ Movimiento guardado','green'); render();
 }
 
 function addLoan(t){
   const person = document.getElementById(t+'Person').value.trim(); const raw = parseAmount(document.getElementById(t+'Amount').value);
-  if(!person){showToast('⚠️ ¿A quién?','red');return;} if(!raw){showToast('⚠️ Monto inválido','red');return;}
-  loans.unshift({id:Date.now(), type:t, person, amount:raw, original:null, paid:false, date: new Date().toLocaleDateString('es-CO',{month:'short',day:'numeric'}) });
-  saveLoans(); document.getElementById(t+'Person').value=''; document.getElementById(t+'Amount').value='';
+  if(!person){showToast('⚠️ Falta el nombre','red');return;} if(!raw){showToast('⚠️ Monto inválido','red');return;}
+  const cur = t==='lent'?lentCurrency:owedCurrency; let amt=raw, orig=null;
+  if(cur==='USD'){ if(!usdRate){showToast('⚠️ Falta Tasa de USD','red');return;} amt=raw*usdRate; orig=`US$ ${fmtCOP(raw)}`; }
+  loans.unshift({id:Date.now(), type:t, person, amount:amt, original:orig, paid:false, date: new Date().toLocaleDateString('es-CO',{month:'short',day:'numeric'}) });
+  saveLoans(); document.getElementById(t+'Person').value=''; document.getElementById(t+'Amount').value=''; document.getElementById(t+'ConvPreview').textContent='';
   showToast('✅ Deuda registrada', t==='lent'?'orange':'purple'); renderLoans();
 }
 
 function addWishlistItem(){
   const name = document.getElementById('buyItemName').value.trim(); const raw = parseAmount(document.getElementById('buyPrice').value);
   if(!name||!raw){ showToast('⚠️ Completa la meta','red'); return; }
-  wishlist.unshift({id:Date.now(), name, amount:raw, original:null}); saveWishlist();
-  document.getElementById('buyItemName').value=''; document.getElementById('buyPrice').value=''; showToast('🛒 Añadido a deseos','blue'); renderWishlist();
+  let amt=raw, orig=null; if(buyCurrency==='USD'){ if(!usdRate){showToast('⚠️ Falta Tasa de USD','red');return;} amt=raw*usdRate; orig=`US$ ${fmtCOP(raw)}`; }
+  wishlist.unshift({id:Date.now(), name, amount:amt, original:orig}); saveWishlist();
+  document.getElementById('buyItemName').value=''; document.getElementById('buyPrice').value=''; document.getElementById('buyConvPreview').textContent='';
+  showToast('🛒 Añadido a deseos','blue'); renderWishlist();
 }
 
-// ── Borrado y Actualizaciones ──
+// ── Borrado y Cambios ──
 function deleteTransaction(id){ transactions = transactions.filter(x=>x.id!==id); save(); render(); showToast('Borrado','red'); }
 function clearAll(){ if(confirm('¿Seguro quieres borrar todo el historial?')){ transactions=[]; save(); render(); } }
 function togglePaid(id){ const l=loans.find(x=>x.id===id); if(!l)return; l.paid=!l.paid; saveLoans(); renderLoans(); showToast(l.paid?'✅ Saldado':'Revertido a pendiente', 'green'); }
 function deleteLoan(id){ loans = loans.filter(x=>x.id!==id); saveLoans(); renderLoans(); }
 function deleteWishlistItem(id){ wishlist = wishlist.filter(x=>x.id!==id); saveWishlist(); renderWishlist(); }
 
-// ── Renders Visuales ──
+// ── Renders ──
 function render(){
   const inc = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const exp = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
@@ -739,7 +867,10 @@ function render(){
       <div class="tx-item" style="animation-delay:${i*0.04}s">
         <div class="tx-icon ${t.type}">${t.type==='income'?'↑':'↓'}</div>
         <div class="tx-info"><div class="tx-desc">${escapeHtml(t.reason)}</div><div class="tx-date">${t.date}</div></div>
-        <div class="tx-right"><div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div></div>
+        <div class="tx-right">
+          <div class="tx-amount syne-font ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
+          ${t.original?`<div class="tx-original">${t.original}</div>`:''}
+        </div>
         <button class="tx-delete" onclick="deleteTransaction(${t.id})">✕</button>
       </div>`).join('');
   }
@@ -748,21 +879,24 @@ function render(){
 function renderLoans(){
   const lentPending = loans.filter(l=>l.type==='lent'&&!l.paid); const owedPending = loans.filter(l=>l.type==='owed'&&!l.paid);
   animateValue('totalLent', lentPending.reduce((s,l)=>s+l.amount,0)); animateValue('totalOwed', owedPending.reduce((s,l)=>s+l.amount,0));
-  document.getElementById('lentPendingCount').textContent = `${lentPending.length} personas pendientes`; document.getElementById('owedPendingCount').textContent = `${owedPending.length} personas pendientes`;
+  document.getElementById('lentPendingCount').textContent = `${lentPending.length} pendientes`; document.getElementById('owedPendingCount').textContent = `${owedPending.length} pendientes`;
   
   ['lent','owed'].forEach(t=>{
     const filtered = loans.filter(l=>l.type===t && (loanFilter[t]==='all' || (loanFilter[t]==='pending'?!l.paid:l.paid)));
     const list = document.getElementById(t+'List');
     if(!filtered.length) list.innerHTML='<div style="text-align:center; color:var(--text-muted); padding:30px; font-weight:700;">Lista limpia</div>';
     else list.innerHTML = filtered.map((l,i)=>`
-      <div class="tx-item" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch; opacity:${l.paid?'0.4':'1'};">
+      <div class="tx-item" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch; opacity:${l.paid?'0.5':'1'};">
         <div style="display:flex; align-items:center; gap:16px;">
           <div class="tx-icon ${t}">${l.person.substring(0,2).toUpperCase()}</div>
           <div class="tx-info"><div style="font-size:16px; font-weight:700;">${escapeHtml(l.person)}</div><div class="tx-date">${l.date}</div></div>
-          <div class="tx-right"><div class="tx-amount ${t}" style="${l.paid?'text-decoration:line-through;':''}">${fmt(l.amount)}</div></div>
+          <div class="tx-right">
+            <div class="tx-amount syne-font ${t}" style="${l.paid?'text-decoration:line-through;':''}">${fmt(l.amount)}</div>
+            ${l.original?`<div class="tx-original">${l.original}</div>`:''}
+          </div>
         </div>
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
-          <button style="font-size:13px; font-weight:800; padding:10px 18px; border-radius:var(--radius-pill); border:none; cursor:pointer; transition:transform 0.2s; background:${l.paid?'rgba(255,255,255,0.15)':t==='lent'?'var(--orange)':'var(--purple)'}; color:${l.paid?'var(--text)':'#000'};" onclick="togglePaid(${l.id})">${l.paid?'Revertir':'Marcar Pagado ✓'}</button>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+          <button style="font-size:13px; font-weight:800; padding:10px 18px; border-radius:var(--radius-pill); border:none; cursor:pointer; background:${l.paid?'rgba(255,255,255,0.15)':t==='lent'?'var(--orange)':'var(--purple)'}; color:${l.paid?'var(--text)':'#000'}; transition:transform 0.2s;" onclick="togglePaid(${l.id})">${l.paid?'Revertir':'Pagado ✓'}</button>
           <button class="tx-delete" onclick="deleteLoan(${l.id})">✕</button>
         </div>
       </div>`).join('');
@@ -777,14 +911,17 @@ function renderWishlist(){
   else container.innerHTML = wishlist.map((item,i)=>{
     const rem = bal - item.amount; const c = rem>=0?'var(--green)':'var(--red)';
     return `<div class="tx-item" style="animation-delay:${i*0.04}s; flex-direction:column; align-items:stretch;">
-      <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:14px;">
         <div class="tx-icon buy">🛍️</div>
         <div class="tx-info"><div class="tx-desc">${escapeHtml(item.name)}</div></div>
-        <div class="tx-right"><div class="tx-amount" style="color:#fff;">${fmt(item.amount)}</div></div>
+        <div class="tx-right">
+          <div class="tx-amount syne-font" style="color:#fff;">${fmt(item.amount)}</div>
+          ${item.original?`<div class="tx-original">${item.original}</div>`:''}
+        </div>
         <button class="tx-delete" onclick="deleteWishlistItem(${item.id})">✕</button>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:13px; padding-top:12px; border-top:1px solid var(--glass-border);">
-        <span style="color:var(--text-muted); font-weight:600;">Te quedaría:</span><span style="font-weight:800; color:${c}">${fmt(rem)}</span>
+      <div style="display:flex; justify-content:space-between; font-size:13px; padding-top:14px; border-top:1px solid var(--glass-border);">
+        <span style="color:var(--text-muted); font-weight:600;">Te quedaría:</span><span class="syne-font" style="font-weight:800; font-size:15px; color:${c}">${fmt(rem)}</span>
       </div>
     </div>`;
   }).join('');
@@ -806,7 +943,7 @@ function renderGraphs(){
 
   if(barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(document.getElementById('barChart'), {
-    type:'bar', data:{ labels:['Ingresos','Egresos'], datasets:[{ data:[inc,exp], backgroundColor:['#00e5a0','#ff4f6a'], borderRadius:10, barPercentage:0.6 }] },
+    type:'bar', data:{ labels:['Ingresos','Egresos'], datasets:[{ data:[inc,exp], backgroundColor:['#00e5a0','#ff4f6a'], borderRadius:12, barPercentage:0.6 }] },
     options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{grid:{color:'rgba(255,255,255,0.05)'},border:{display:false}}, x:{grid:{display:false},border:{display:false}}} }
   });
 
@@ -814,7 +951,7 @@ function renderGraphs(){
   if(bal===0 && o===0 && l===0) return;
   doughnutChartInstance = new Chart(document.getElementById('doughnutChart'), {
     type:'doughnut', data:{ labels:['Líquido','Me Deben','Presté'], datasets:[{ data:[bal,o,l], backgroundColor:['#5b8fff','#b57bff','#ff9c40'], borderWidth:0, hoverOffset:10 }] },
-    options:{ responsive:true, cutout:'75%', plugins:{legend:{position:'bottom', labels:{color:'#fff', font:{family:"'DM Sans'", size:13, weight:'bold'}, padding:20, usePointStyle:true}}} }
+    options:{ responsive:true, cutout:'75%', plugins:{legend:{position:'bottom', labels:{color:'#fff', font:{family:"'DM Sans'", size:13, weight:'bold'}, padding:24, usePointStyle:true}}} }
   });
 }
 
@@ -837,14 +974,19 @@ function mathAction(val) {
   mathExp += val; screen.textContent = mathExp;
 }
 
-// ── Soporte Teclado Enter ──
-['amountInput','reasonInput','lentAmount','owedAmount','buyPrice'].forEach(id=>{
-  document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') {
+// ── Teclado Móvil (Enter/Done Support) ──
+['amountInput','reasonInput','lentAmount','lentPerson','owedAmount','owedPerson','buyPrice','buyItemName'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter') {
+    e.preventDefault(); // Evitar bug de iOS
     if(id==='amountInput') document.getElementById('reasonInput').focus();
-    else if(id==='reasonInput') addTransaction();
-    else if(id==='lentAmount') addLoan('lent');
-    else if(id==='owedAmount') addLoan('owed');
-    else if(id==='buyPrice') addWishlistItem();
+    else if(id==='reasonInput') { addTransaction(); el.blur(); }
+    else if(id==='lentPerson') document.getElementById('lentAmount').focus();
+    else if(id==='lentAmount') { addLoan('lent'); el.blur(); }
+    else if(id==='owedPerson') document.getElementById('owedAmount').focus();
+    else if(id==='owedAmount') { addLoan('owed'); el.blur(); }
+    else if(id==='buyItemName') document.getElementById('buyPrice').focus();
+    else if(id==='buyPrice') { addWishlistItem(); el.blur(); }
   }});
 });
 
