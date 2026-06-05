@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <!-- Sincronizado exactamente con el color superior del degradado para fundirse con la Isla Dinámica -->
     <meta name="theme-color" content="#0a0e17">
     <link rel="icon" type="image/png" href="logo.png?v=1">
     <title>Finanzas Gabriel</title>
@@ -50,30 +49,30 @@
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-/* ── INTEGRACIÓN TOTAL DEL FONDO (ADIÓS CORTE NEGRO) ── */
-html {
-  background: #0a0e17; /* Base idéntica al notch para evitar destellos */
+/* ── ELIMINACIÓN DEL CORTE NEGRO (BODY FIJO) ── */
+html, body {
+  /* Forzamos el color exacto del status bar para que se funda */
+  background-color: #0a0e17 !important;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  height: 100dvh; /* Soporte para el viewport dinámico de iOS */
+  overflow: hidden; /* Prohibimos que el body scrollee */
+  position: fixed;
+  inset: 0;
 }
 
 body {
-  /* Degradado aplicado directamente al body para llenar toda la pantalla */
-  background: linear-gradient(135deg, #0a0e17, #120d1c, #040a12);
-  background-size: cover;
-  background-attachment: fixed;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  width: 100vw;
-  height: 100vh; /* 100vh en vez de fill-available obliga a cubrir el safe area */
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
+}
+
+/* ── FONDO DEGRADADO EN CAPA SEPARADA ── */
+.bg-layer {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #0a0e17, #120d1c, #040a12);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .syne-font { font-family: 'Syne', sans-serif; }
@@ -93,33 +92,35 @@ body {
 }
 
 .bg-orb {
-  position: fixed; 
+  position: absolute; 
   border-radius: var(--radius-circle); 
   filter: blur(90px);
   opacity: 0.35; 
   pointer-events: none; 
-  z-index: 0;
+  z-index: 1;
 }
 .orb-1 { top: -50px; left: -80px; width: 450px; height: 450px; background: var(--green); animation: float1 18s ease-in-out infinite; }
 .orb-2 { bottom: 5%; right: -10%; width: 340px; height: 340px; background: var(--blue); animation: float2 22s ease-in-out infinite; }
 .orb-3 { top: 35%; left: -20%; width: 300px; height: 300px; background: var(--purple); opacity: 0.25; animation: float3 25s ease-in-out infinite; }
 
-/* ── CONTENEDOR MÓVIL (Con padding seguro) ── */
+/* ── CONTENEDOR MÓVIL (Aquí es donde ocurre el scroll) ── */
 .app-container { 
-  flex: 1;
-  width: 100%; 
-  max-width: 480px; 
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch; 
   
-  /* Se empuja el contenido hacia abajo para que no se superponga con la hora/batería */
-  padding-top: calc(max(50px, env(safe-area-inset-top)) + 16px);
+  /* Ajuste preciso para la isla dinámica usando variables de entorno de iOS */
+  padding-top: calc(env(safe-area-inset-top, 45px) + 16px);
   padding-left: 16px;
   padding-right: 16px;
-  padding-bottom: 120px;
-  position: relative;
-  z-index: 1;
+  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 100px);
+  z-index: 2;
+  
+  /* Centrado en pantallas más grandes */
+  margin: 0 auto;
+  max-width: 480px;
 }
 
 header {
@@ -541,6 +542,9 @@ canvas { width: 100% !important; max-height: 260px; }
 </head>
 <body>
 
+<!-- Capa fija que se pinta debajo de absolutamente todo -->
+<div class="bg-layer"></div>
+
 <div class="bg-orb orb-1"></div>
 <div class="bg-orb orb-2"></div>
 <div class="bg-orb orb-3"></div>
@@ -587,7 +591,7 @@ canvas { width: 100% !important; max-height: 260px; }
   </div>
 </div>
 
-<!-- CONTENEDOR MÓVIL -->
+<!-- CONTENEDOR MÓVIL (Con scroll aislado) -->
 <div class="app-container">
 
   <header>
