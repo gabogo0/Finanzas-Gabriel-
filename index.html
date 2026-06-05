@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#08080f">
+    <!-- Se ha eliminado la etiqueta theme-color para permitir que la barra de estado sea 100% transparente en iOS -->
     <link rel="icon" type="image/png" href="logo.png?v=1">
     <title>Finanzas Gabriel</title>
     
@@ -51,7 +51,7 @@
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-/* ── Fondo Inmersivo (Corregido para iOS Notch) ── */
+/* ── Fondo Inmersivo ── */
 html {
   background-color: var(--bg-color);
   width: 100%;
@@ -59,9 +59,6 @@ html {
 }
 
 body {
-  /* Aplicamos el gradiente directamente al body para que fluya hacia la isla dinámica sin cortes */
-  background: linear-gradient(135deg, #08080f, #120d1c, #040a12);
-  background-attachment: fixed;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
   width: 100%; 
@@ -73,6 +70,16 @@ body {
   justify-content: center;
   position: relative;
   margin: 0;
+  background-color: transparent; 
+}
+
+/* LA CAPA MÁGICA GIGANTE: Cubre los desbordes del iOS para que jamás se vea un corte negro */
+.bg-layer {
+  position: fixed; 
+  top: -25vh; left: -25vw; 
+  width: 150vw; height: 150vh;
+  background: linear-gradient(135deg, #08080f, #120d1c, #040a12);
+  z-index: -2;
 }
 
 .syne-font { font-family: 'Syne', sans-serif; }
@@ -81,10 +88,10 @@ body {
 .bg-orb {
   position: fixed; 
   border-radius: var(--radius-circle); filter: blur(80px);
-  opacity: 0.35; pointer-events: none; z-index: 0;
+  opacity: 0.35; pointer-events: none; z-index: -1;
 }
-/* Subimos la luz verde para que ilumine detrás del reloj y la batería de iOS */
-.orb-1 { top: -60px; left: -40px; width: 350px; height: 350px; background: var(--green); }
+/* Se subió y agrandó para iluminar directamente detrás de la barra de estado */
+.orb-1 { top: -120px; left: -80px; width: 400px; height: 400px; background: var(--green); }
 .orb-2 { bottom: 10%; right: -10%; width: 340px; height: 340px; background: var(--blue); }
 
 /* ── Contenedor Principal ── */
@@ -93,6 +100,7 @@ body {
   z-index: 1; 
   width: 100%; 
   max-width: 480px; 
+  /* Se restauró el padding natural para que fluya bajo el cristal */
   padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(120px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   overflow-x: hidden;
 }
@@ -113,7 +121,6 @@ header {
   letter-spacing: -0.5px; 
   text-shadow: 0 4px 16px rgba(0,0,0,0.6); 
   line-height: 1.1;
-  /* Flex permite que las palabras se acomoden si la pantalla es muy estrecha */
   display: flex;
   flex-wrap: wrap;
   column-gap: 5px;
@@ -124,7 +131,7 @@ header {
   display: flex; 
   align-items: center; 
   gap: 6px; 
-  flex-shrink: 0; /* Impide que los botones se deformen por falta de espacio */
+  flex-shrink: 0; 
 }
 
 .privacy-btn {
@@ -132,7 +139,7 @@ header {
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(20px); 
   -webkit-backdrop-filter: blur(20px);
-  width: 36px; /* Botones un poco más compactos */
+  width: 36px; 
   height: 36px; 
   border-radius: 50%;
   display: flex; 
@@ -486,6 +493,8 @@ canvas { width: 100% !important; max-height: 260px; }
 </head>
 <body>
 
+<div class="bg-layer"></div>
+
 <div class="bg-orb orb-1"></div>
 <div class="bg-orb orb-2"></div>
 
@@ -834,7 +843,7 @@ let accounts     = JSON.parse(localStorage.getItem('fg_accounts') || '{"cash":0,
 let barChartInstance = null; let doughnutChartInstance = null;
 Chart.defaults.color = '#9aa0a6'; Chart.defaults.font.family = "'DM Sans', sans-serif";
 
-// ── Fecha (Corregido a un formato corto para no romper la pantalla) ──
+// ── Fecha ──
 const dateOpts = { day:'numeric', month:'short' };
 let today = new Date().toLocaleDateString('es-CO', dateOpts).replace('.', '');
 document.getElementById('dateDisplay').textContent = today.charAt(0).toUpperCase() + today.slice(1);
@@ -967,7 +976,6 @@ function toggleCalc() {
 
 // ── Utilidades ──
 function fmtCOP(n) { return Math.round(Math.abs(n)).toLocaleString('es-CO'); }
-// Magia: \u00A0 une el signo de peso con el número de forma inquebrantable
 function fmt(n) { return (n < 0 ? '- ' : '') + '$\u00A0' + fmtCOP(Math.abs(n)); } 
 function parseAmount(str) { return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0; }
 function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
