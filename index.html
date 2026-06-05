@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#08080f">
     <link rel="icon" type="image/png" href="logo.png?v=1">
     <title>Finanzas Gabriel</title>
     
@@ -14,17 +15,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
-  /* Fondo Oscuro Base */
   --bg-color: #08080f;
-  
-  /* Cristal Realista */
   --glass-bg: rgba(26, 26, 38, 0.4);
   --glass-border: rgba(255, 255, 255, 0.08);
   --input-bg: rgba(0, 0, 0, 0.45);
-  
   --text: #ffffff;
   --text-muted: #9aa0a6;
-  
   --green: #00e5a0;
   --green-dim: rgba(0,229,160,0.15);
   --red: #ff4f6a;
@@ -38,11 +34,9 @@
   --orange: #ff9c40;
   --orange-dim: rgba(255,156,64,0.15);
   --teal: #00d4ff;
-  
   --radius-card: 32px;
   --radius-pill: 50px;
   --radius-circle: 50%;
-  
   --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1.15);
   --spring-smooth: cubic-bezier(0.25, 1, 0.5, 1);
   --press-effect: cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -50,13 +44,22 @@
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-/* ── BLOQUEO DE PANTALLA BASE ── */
-html, body {
+html {
   background-color: var(--bg-color);
   width: 100%;
   max-width: 100vw;
   height: 100%;
-  overflow: hidden; /* Fija la pantalla para que el sistema de iOS no haga rebotes raros */
+  height: -webkit-fill-available;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--bg-color);
+  width: 100%;
+  max-width: 100vw;
+  height: 100%;
+  height: -webkit-fill-available;
+  overflow: hidden;
 }
 
 body {
@@ -70,18 +73,17 @@ body {
   background-color: transparent; 
 }
 
-/* ── FONDO INFINITO (Cubre detrás de la Isla Dinámica) ── */
 .bg-layer {
   position: fixed; 
-  top: -25vh; left: -25vw; 
-  width: 150vw; height: 150vh;
+  top: -50px; left: -25vw; 
+  width: 150vw; 
+  height: calc(150vh + 100px);
   background: linear-gradient(135deg, #08080f, #120d1c, #040a12);
   z-index: -3;
 }
 
 .syne-font { font-family: 'Syne', sans-serif; }
 
-/* ── ILUMINACIÓN FLOTANTE (CRISTAL VIVO) ── */
 @keyframes float1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(30px, 40px) scale(1.1); }
@@ -103,30 +105,35 @@ body {
   pointer-events: none; 
   z-index: -2;
 }
-/* Orb-1 está bien arriba para teñir la zona de la batería y hora */
-.orb-1 { top: -120px; left: -80px; width: 400px; height: 400px; background: var(--green); animation: float1 18s ease-in-out infinite; }
+.orb-1 { top: -150px; left: -80px; width: 450px; height: 450px; background: var(--green); animation: float1 18s ease-in-out infinite; }
 .orb-2 { bottom: 5%; right: -10%; width: 340px; height: 340px; background: var(--blue); animation: float2 22s ease-in-out infinite; }
 .orb-3 { top: 35%; left: -20%; width: 300px; height: 300px; background: var(--purple); opacity: 0.25; animation: float3 25s ease-in-out infinite; }
 
-/* ── CONTENEDOR MÓVIL (El que hace Scroll) ── */
 .app-container { 
-  flex: 1; /* Ocupa todo el espacio de la pantalla */
+  flex: 1;
   width: 100%; 
   max-width: 480px; 
-  overflow-y: auto; /* Aquí ocurre el scroll nativo */
+  overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch; 
-  
-  /* Padding superior ajustado a la Isla Dinámica */
-  padding: max(60px, calc(env(safe-area-inset-top) + 10px)) 16px 120px 16px;
+  padding-top: max(70px, calc(env(safe-area-inset-top) + 16px));
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 120px;
   position: relative;
   z-index: 1;
-  
-  /* 🪄 MÁSCARA MÁGICA: 
-     Hace que todo el contenido dentro de este contenedor se vuelva transparente 
-     justo antes de tocar la hora y la batería. El fondo verde no se ve afectado. */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent max(15px, calc(env(safe-area-inset-top) - 15px)), black max(60px, env(safe-area-inset-top)));
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent max(15px, calc(env(safe-area-inset-top) - 15px)), black max(60px, env(safe-area-inset-top)));
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent max(10px, calc(env(safe-area-inset-top) - 20px)),
+    black max(55px, env(safe-area-inset-top))
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent max(10px, calc(env(safe-area-inset-top) - 20px)),
+    black max(55px, env(safe-area-inset-top))
+  );
 }
 
 header {
@@ -191,12 +198,10 @@ header {
   white-space: nowrap; 
 }
 
-/* ── MODO PRIVACIDAD ── */
 .privacy-mode .sensitive { filter: blur(12px); opacity: 0.6; pointer-events: none; }
 .privacy-mode canvas { filter: blur(14px); opacity: 0.5; pointer-events: none; }
 .sensitive { transition: filter 0.4s ease, opacity 0.4s ease; }
 
-/* ── BURBUJA FLOTANTE (MODAL) PERFECTA ── */
 #bubbleOverlay {
   position: fixed; inset: 0; z-index: 99999;
   background: rgba(0,0,0,0.65); 
@@ -239,7 +244,6 @@ header {
 }
 .bubble-close:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
 
-/* ── PANELES DE CUENTAS (BILLETERA / BANCO) ── */
 #accountsOverlay {
   position: fixed; inset: 0; z-index: 90000;
   background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -265,11 +269,9 @@ header {
   display:flex; justify-content:space-between; align-items:center;
 }
 
-/* Clases interactivas para textos que despliegan la burbuja */
 .clickable-text { cursor: pointer; transition: all 0.2s; }
 .clickable-text:active { transform: scale(0.98); opacity: 0.8; }
 
-/* ── PANELES DE CRISTAL BASE ── */
 .glass-panel {
   background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%), var(--glass-bg);
   backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -283,7 +285,6 @@ header {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ── DOCK FLOTANTE ── */
 .nav-dock-container {
   position: fixed; bottom: 20px; left: 0; right: 0;
   display: flex; justify-content: center; z-index: 1000;
@@ -314,7 +315,6 @@ header {
 .nav-tab.active .tab-text { color: #000000; }
 .nav-tab.active .tab-icon { transform: scale(1.2) translate3d(0, -2px, 0); }
 
-/* ── ANIMACIÓN DE PÁGINAS ── */
 .page { display:none; opacity:0; }
 .page.active { display:block; animation: pageAppear 0.4s ease-out forwards; }
 @keyframes pageAppear {
@@ -322,7 +322,6 @@ header {
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
-/* ── TARJETAS DE FINANZAS ── */
 .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
 
 .card {
@@ -350,7 +349,6 @@ header {
 .savings-bar-wrap { margin-top:16px; width:100%; background: rgba(0,0,0,0.6); border-radius:var(--radius-pill); height:8px; overflow:hidden;}
 .savings-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:var(--radius-pill); transition:width 1s ease; width:0%; box-shadow: 0 0 10px rgba(0,229,160,0.6);}
 
-/* ── FORMULARIOS ── */
 .form-section { padding: 26px 24px; margin-bottom:24px; }
 .form-title { font-size:18px; font-weight:800; margin-bottom:24px; display:flex; align-items:center; gap:10px; }
 
@@ -372,7 +370,7 @@ header {
   display:flex; align-items:stretch; gap:10px; 
   background: var(--input-bg); border:1px solid var(--glass-border); 
   border-radius:var(--radius-pill); padding:6px;
-  max-width: 100%; /* Blindaje horizontal */
+  max-width: 100%;
 }
 .amount-row:focus-within { border-color:rgba(255,255,255,0.4); background: rgba(255,255,255,0.08); }
 
@@ -411,7 +409,6 @@ input::placeholder { color: rgba(255,255,255,0.25); font-size: 16px;}
 .conversion-preview { font-size:13px; font-weight:800; color:var(--text-muted); margin-top:8px; margin-left: 14px; min-height:18px; }
 .conversion-preview.active { color:var(--gold); }
 
-/* Botón Principal */
 .add-btn {
   width:100%; padding:20px; border-radius:var(--radius-pill); border:none;
   font-size:16px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
@@ -424,11 +421,9 @@ input::placeholder { color: rgba(255,255,255,0.25); font-size: 16px;}
 .add-btn.btn-owed    { background:var(--purple); color:#000; box-shadow: 0 8px 24px rgba(181,123,255,0.3); }
 .add-btn.btn-buy     { background:var(--blue);   color:#fff; box-shadow: 0 8px 24px rgba(91,143,255,0.3); }
 
-/* ── TASA DE CAMBIO ── */
 .rate-section { padding: 16px 24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;}
 .rate-info { display:flex; flex-direction:column; gap:4px; }
 
-/* ── HISTORIAL Y LISTAS ── */
 .history-header {
   font-size:20px; font-weight:800; letter-spacing:-0.5px;
   color:var(--text); margin: 36px 0 20px; padding: 0 8px;
@@ -469,7 +464,6 @@ input::placeholder { color: rgba(255,255,255,0.25); font-size: 16px;}
 .tx-delete { background:rgba(255,255,255,0.1); border:none; color:var(--text-muted); cursor:pointer; width:36px; height:36px; border-radius:var(--radius-circle); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; transition: transform 0.2s; }
 .tx-delete:active { transform:scale(0.8); background:var(--red); color:#fff; }
 
-/* ── FILTROS PILLS ── */
 .filter-tabs { display:flex; gap:10px; margin-bottom:24px; }
 .filter-tab {
   flex:1; padding:14px; border-radius:var(--radius-pill); border:1px solid var(--glass-border);
@@ -480,12 +474,10 @@ input::placeholder { color: rgba(255,255,255,0.25); font-size: 16px;}
 .filter-tab.active-pending{ background:var(--orange); color:#000; border-color:var(--orange);}
 .filter-tab.active-paid   { background:var(--green);  color:#000; border-color:var(--green);}
 
-/* ── GRÁFICOS ── */
 .chart-container { padding: 26px; margin-bottom: 24px; }
 .chart-title { font-size:18px; font-weight:800; text-align:center; margin-bottom:24px; color:#fff; letter-spacing:-0.5px;}
 canvas { width: 100% !important; max-height: 260px; }
 
-/* ── CALCULADORA DESPLEGABLE ── */
 .calc-wrapper {
   display: grid; grid-template-rows: 0fr;
   transition: grid-template-rows 0.4s ease, opacity 0.3s ease;
@@ -512,7 +504,6 @@ canvas { width: 100% !important; max-height: 260px; }
 .calc-btn.equal { background: var(--teal); color: #000; border-radius: var(--radius-pill); grid-column: span 2; aspect-ratio: auto; }
 .calc-btn.clear { color: var(--red); background: rgba(255,79,106,0.1); border-color: rgba(255,79,106,0.2);}
 
-/* ── TOAST ── */
 .toast {
   position:fixed; top:30px; left:50%; transform:translate3d(-50%, -100px, 0) scale(0.9);
   background:rgba(25,25,35,0.98); backdrop-filter:blur(30px); border:1px solid var(--glass-border);
@@ -529,13 +520,11 @@ canvas { width: 100% !important; max-height: 260px; }
 </head>
 <body>
 
-<!-- FONDO ESTÁTICO (Nunca se mueve ni estorba arriba) -->
 <div class="bg-layer"></div>
 <div class="bg-orb orb-1"></div>
 <div class="bg-orb orb-2"></div>
 <div class="bg-orb orb-3"></div>
 
-<!-- BURBUJA DE DETALLES -->
 <div id="bubbleOverlay" onclick="closeBubble()">
   <div class="bubble-card" onclick="event.stopPropagation()">
     <div id="bubbleTitle" class="bubble-title syne-font">Detalle</div>
@@ -545,7 +534,6 @@ canvas { width: 100% !important; max-height: 260px; }
   </div>
 </div>
 
-<!-- PANEL DE CUENTAS (BILLETERA) -->
 <div id="accountsOverlay" onclick="toggleAccounts()"></div>
 <div id="accountsSheet" class="accounts-sheet">
   <div class="sheet-drag"></div>
@@ -577,7 +565,6 @@ canvas { width: 100% !important; max-height: 260px; }
   </div>
 </div>
 
-<!-- CONTENEDOR MÓVIL (El que scrollea y se desvanece al llegar arriba) -->
 <div class="app-container">
 
   <header>
@@ -842,7 +829,6 @@ canvas { width: 100% !important; max-height: 260px; }
 
 </div>
 
-<!-- NAVEGACIÓN (DOCK) -->
 <div class="nav-dock-container">
   <div class="nav-dock" id="mainNav">
     <div class="nav-tab active" onclick="showPage('fin', this)">
@@ -869,13 +855,11 @@ canvas { width: 100% !important; max-height: 260px; }
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Estado Inicial ──
 let currentType = 'income'; let currentCurrency = 'COP'; let lentCurrency = 'COP';
 let owedCurrency = 'COP'; let buyCurrency = 'COP'; let usdRate = null;
 let currentPage = 'fin'; let loanFilter = { lent: 'all', owed: 'all' };
 let isPrivacy = false;
 
-// ── Datos Locales y Nuevas Cuentas ──
 let transactions = JSON.parse(localStorage.getItem('fg_tx') || '[]');
 let loans        = JSON.parse(localStorage.getItem('fg_loans') || '[]');
 let wishlist     = JSON.parse(localStorage.getItem('fg_wishlist') || '[]');
@@ -884,12 +868,10 @@ let accounts     = JSON.parse(localStorage.getItem('fg_accounts') || '{"cash":0,
 let barChartInstance = null; let doughnutChartInstance = null;
 Chart.defaults.color = '#9aa0a6'; Chart.defaults.font.family = "'DM Sans', sans-serif";
 
-// ── Fecha ──
 const dateOpts = { day:'numeric', month:'short' };
 let today = new Date().toLocaleDateString('es-CO', dateOpts).replace('.', '');
 document.getElementById('dateDisplay').textContent = today.charAt(0).toUpperCase() + today.slice(1);
 
-// ── PRIVACIDAD 👁️ ──
 function togglePrivacy() {
   isPrivacy = !isPrivacy;
   const btn = document.getElementById('privacyBtn');
@@ -906,7 +888,6 @@ function togglePrivacy() {
   }
 }
 
-// ── PANEL DE CUENTAS (BILLETERA / BANCO) 💳 ──
 function toggleAccounts() {
   const overlay = document.getElementById('accountsOverlay');
   const sheet = document.getElementById('accountsSheet');
@@ -935,9 +916,8 @@ function updateAccountsTotal() {
   document.getElementById('accountsTotal').textContent = fmt(accounts.cash + accounts.bank);
 }
 
-// ── LÓGICA DE LA BURBUJA FLOTANTE (MODAL CON MOTIVO) ──
 function showBubble(title, val, reason = null) {
-  if(isPrivacy) return; // Si hay privacidad, se bloquea la burbuja
+  if(isPrivacy) return;
   document.getElementById('bubbleTitle').textContent = title;
   document.getElementById('bubbleValue').textContent = val;
   
@@ -955,7 +935,6 @@ function closeBubble() {
   document.getElementById('bubbleOverlay').classList.remove('show');
 }
 
-// ── Animación Números Fluida ──
 const animatedElements = new Map();
 function animateValue(elId, newVal) {
   const el = document.getElementById(elId);
@@ -976,7 +955,6 @@ function animateValue(elId, newVal) {
   window.requestAnimationFrame(step);
 }
 
-// ── NAVEGACIÓN DOCK ──
 function showPage(page, tabElement) {
   currentPage = page;
   document.querySelectorAll('.page').forEach(p => {
@@ -995,7 +973,6 @@ function showPage(page, tabElement) {
   if (page === 'graph') renderGraphs();
 }
 
-// ── Calculadora Acordeón ──
 function toggleCalc() {
   const w = document.getElementById('calcWrapper');
   const b = document.getElementById('toggleCalcBtn');
@@ -1015,7 +992,6 @@ function toggleCalc() {
   }
 }
 
-// ── Utilidades ──
 function fmtCOP(n) { return Math.round(Math.abs(n)).toLocaleString('es-CO'); }
 function fmt(n) { return (n < 0 ? '- ' : '') + '$\u00A0' + fmtCOP(Math.abs(n)); } 
 function parseAmount(str) { return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0; }
@@ -1031,7 +1007,6 @@ function showToast(msg, type) {
   setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-// ── Tasa de Cambio Automática en Vivo ──
 async function fetchRate(silent = false) {
   try {
     if(!silent) document.getElementById('rateHint').textContent = 'Sincronizando tasa...';
@@ -1049,7 +1024,6 @@ async function fetchRate(silent = false) {
   }
 }
 
-// ── Formateo de Inputs en Vivo ──
 function attachFormatter(id, curGetter) {
   const el = document.getElementById(id);
   if(!el) return;
@@ -1075,7 +1049,6 @@ function updateAllPreviews() {
   });
 }
 
-// ── Toggles Visuales ──
 function setCurrency(cur){ currentCurrency=cur; toggleCurBtns('curCOP','curUSD',cur); document.getElementById('amountPrefix').textContent=cur==='USD'?'US$':'$'; document.getElementById('rateSection').style.display=cur==='USD'?'flex':'none';}
 function setLoanCurrency(t,cur){ if(t==='lent'){lentCurrency=cur; toggleCurBtns('lentCurCOP','lentCurUSD',cur); document.getElementById('lentAmountPrefix').textContent=cur==='USD'?'US$':'$';} else {owedCurrency=cur; toggleCurBtns('owedCurCOP','owedCurUSD',cur); document.getElementById('owedAmountPrefix').textContent=cur==='USD'?'US$':'$';}}
 function setBuyCurrency(cur){ buyCurrency=cur; toggleCurBtns('buyCurCOP','buyCurUSD',cur); document.getElementById('buyAmountPrefix').textContent=cur==='USD'?'US$':'$'; }
@@ -1099,7 +1072,6 @@ function setLoanFilter(t,f){
   renderLoans();
 }
 
-// ── Agregar Datos ──
 function addTransaction(){
   const raw = parseAmount(document.getElementById('amountInput').value); const reason = document.getElementById('reasonInput').value.trim();
   if(!raw){ showToast('⚠️ Ingresa un monto','red'); return; } if(!reason){ showToast('⚠️ Falta el motivo','red'); return; }
@@ -1131,14 +1103,12 @@ function addWishlistItem(){
   showToast('🛒 Añadido a deseos','blue'); renderWishlist();
 }
 
-// ── Borrado y Cambios ──
 function deleteTransaction(id){ transactions = transactions.filter(x=>x.id!==id); save(); render(); showToast('Borrado','red'); }
 function clearAll(){ if(confirm('¿Seguro quieres borrar todo el historial?')){ transactions=[]; save(); render(); } }
 function togglePaid(id){ const l=loans.find(x=>x.id===id); if(!l)return; l.paid=!l.paid; saveLoans(); renderLoans(); showToast(l.paid?'✅ Saldado':'Pendiente', 'green'); }
 function deleteLoan(id){ loans = loans.filter(x=>x.id!==id); saveLoans(); renderLoans(); }
 function deleteWishlistItem(id){ wishlist = wishlist.filter(x=>x.id!==id); saveWishlist(); renderWishlist(); }
 
-// ── Renders Base ──
 function render(){
   const inc = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const exp = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
@@ -1227,7 +1197,6 @@ function renderCalc(){
   animateValue('calcTotal', bal+o+l); animateValue('calcBalance', bal); animateValue('calcOwed', o); animateValue('calcLent', l);
 }
 
-// ── GRÁFICO MENSUAL INTELIGENTE ──
 function renderGraphs(){
   const monthlyData = {};
   const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -1270,7 +1239,6 @@ function renderGraphs(){
   });
 }
 
-// ── Calculadora Acelerada ──
 let mathExp = '';
 function mathAction(val) {
   const screen = document.getElementById('mathScreen');
@@ -1289,7 +1257,6 @@ function mathAction(val) {
   mathExp += val; screen.textContent = mathExp;
 }
 
-// ── Teclado Móvil (Enter) ──
 ['amountInput','reasonInput','lentAmount','lentPerson','lentNote','owedAmount','owedPerson','owedNote','buyPrice','buyItemName','cashInput','bankInput'].forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter') {
@@ -1309,7 +1276,6 @@ function mathAction(val) {
   }});
 });
 
-// Boot inicial
 render(); renderLoans(); renderWishlist();
 fetchRate(true);
 </script>
