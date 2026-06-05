@@ -51,80 +51,113 @@
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
+/* ── Fondo Inmersivo (Corregido para iOS Notch) ── */
 html {
-  background-color: var(--bg-color); 
-  width: 100vw;
+  background-color: var(--bg-color);
+  width: 100%;
   height: 100%;
-  overflow-x: hidden;
-  overscroll-behavior-y: none;
 }
 
 body {
-  background-color: var(--bg-color);
+  /* Aplicamos el gradiente directamente al body para que fluya hacia la isla dinámica sin cortes */
+  background: linear-gradient(135deg, #08080f, #120d1c, #040a12);
+  background-attachment: fixed;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  min-height: 100dvh;
-  width: 100vw;
-  overflow-x: hidden; 
+  width: 100%; 
+  min-height: 100dvh; 
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   display: flex;
   justify-content: center;
   position: relative;
+  margin: 0;
 }
 
 .syne-font { font-family: 'Syne', sans-serif; }
-
-/* ── Fondo Inmersivo ── */
-.bg-layer {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, #08080f, #120d1c, #040a12);
-  z-index: -2;
-}
 
 /* ── Iluminación Ambiental FIJA ── */
 .bg-orb {
   position: fixed; 
   border-radius: var(--radius-circle); filter: blur(80px);
-  opacity: 0.3; pointer-events: none;
+  opacity: 0.35; pointer-events: none; z-index: 0;
 }
-.orb-1 { top: -5%; left: -5%; width: 300px; height: 300px; background: var(--green); }
-.orb-2 { bottom: 15%; right: -5%; width: 320px; height: 320px; background: var(--blue); }
+/* Subimos la luz verde para que ilumine detrás del reloj y la batería de iOS */
+.orb-1 { top: -60px; left: -40px; width: 350px; height: 350px; background: var(--green); }
+.orb-2 { bottom: 10%; right: -10%; width: 340px; height: 340px; background: var(--blue); }
 
-/* ── Contenedor Principal (Respeta Notch y Dock) ── */
+/* ── Contenedor Principal ── */
 .app-container { 
-  position:relative; z-index:1; width:100%; max-width:480px; 
-  padding: 16px; 
-  padding-top: max(20px, env(safe-area-inset-top)); 
-  padding-bottom: 120px; 
+  position: relative; 
+  z-index: 1; 
+  width: 100%; 
+  max-width: 480px; 
+  padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(120px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   overflow-x: hidden;
 }
 
 header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:24px; padding: 0 4px;
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between;
+  margin-bottom: 24px; 
+  padding: 0; 
+  width: 100%;
+  gap: 4px;
 }
-.logo { font-weight:800; font-size:26px; letter-spacing:-0.5px; text-shadow: 0 4px 16px rgba(0,0,0,0.6); }
-.logo span { color:var(--green); }
 
-.header-actions { display:flex; align-items:center; gap:10px; }
+.logo { 
+  font-weight: 800; 
+  font-size: clamp(16px, 4.5vw, 22px); 
+  letter-spacing: -0.5px; 
+  text-shadow: 0 4px 16px rgba(0,0,0,0.6); 
+  line-height: 1.1;
+  /* Flex permite que las palabras se acomoden si la pantalla es muy estrecha */
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 5px;
+}
+.logo span { color: var(--green); }
+
+.header-actions { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+  flex-shrink: 0; /* Impide que los botones se deformen por falta de espacio */
+}
 
 .privacy-btn {
-  background: var(--glass-bg); border:1px solid var(--glass-border);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  width: 44px; height: 44px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; cursor: pointer; transition: all 0.3s var(--press-effect);
+  background: var(--glass-bg); 
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px); 
+  -webkit-backdrop-filter: blur(20px);
+  width: 36px; /* Botones un poco más compactos */
+  height: 36px; 
+  border-radius: 50%;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-size: 16px; 
+  cursor: pointer; 
+  transition: all 0.3s var(--press-effect);
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 .privacy-btn:active { transform: scale(0.85); }
 
 .date-badge {
-  font-size:13px; font-weight:800; color:var(--text);
-  background: var(--glass-bg); border:1px solid var(--glass-border);
+  font-size: 12px; 
+  font-weight: 800; 
+  color: var(--text);
+  background: var(--glass-bg); 
+  border: 1px solid var(--glass-border);
   border-top: 1px solid rgba(255,255,255,0.2);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-radius: var(--radius-pill); padding:10px 18px;
+  backdrop-filter: blur(20px); 
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-pill); 
+  padding: 8px 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  white-space: nowrap; 
 }
 
 /* ── MODO PRIVACIDAD ── */
@@ -453,7 +486,6 @@ canvas { width: 100% !important; max-height: 260px; }
 </head>
 <body>
 
-<div class="bg-layer"></div>
 <div class="bg-orb orb-1"></div>
 <div class="bg-orb orb-2"></div>
 
@@ -502,7 +534,7 @@ canvas { width: 100% !important; max-height: 260px; }
   <header>
     <div class="logo syne-font">Finanzas <span>Gabriel</span></div>
     <div class="header-actions">
-      <button class="privacy-btn" onclick="toggleAccounts()" style="font-size: 18px; margin-right: 5px;">💳</button>
+      <button class="privacy-btn" onclick="toggleAccounts()">💳</button>
       <button class="privacy-btn" id="privacyBtn" onclick="togglePrivacy()">👁️</button>
       <div class="date-badge" id="dateDisplay"></div>
     </div>
@@ -802,9 +834,9 @@ let accounts     = JSON.parse(localStorage.getItem('fg_accounts') || '{"cash":0,
 let barChartInstance = null; let doughnutChartInstance = null;
 Chart.defaults.color = '#9aa0a6'; Chart.defaults.font.family = "'DM Sans', sans-serif";
 
-// ── Fecha ──
-const dateOpts = { weekday:'long', day:'numeric', month:'short' };
-let today = new Date().toLocaleDateString('es-CO', dateOpts);
+// ── Fecha (Corregido a un formato corto para no romper la pantalla) ──
+const dateOpts = { day:'numeric', month:'short' };
+let today = new Date().toLocaleDateString('es-CO', dateOpts).replace('.', '');
 document.getElementById('dateDisplay').textContent = today.charAt(0).toUpperCase() + today.slice(1);
 
 // ── PRIVACIDAD 👁️ ──
