@@ -15,8 +15,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
-  /* Liquid Glass Base */
-  --glass-bg: rgba(255, 255, 255, 0.02);
+  /* Liquid Glass Base - Sin saturación para evitar parpadeos en iOS */
+  --glass-bg: rgba(255, 255, 255, 0.04);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-highlight: rgba(255, 255, 255, 0.15);
   --input-bg: rgba(0, 0, 0, 0.35);
@@ -49,35 +49,35 @@
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-/* ── ELIMINACIÓN DEL CORTE NEGRO (BODY FIJO) ── */
-html, body {
-  /* Forzamos el color exacto del status bar para que se funda */
-  background-color: #0a0e17 !important;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh; /* Soporte para el viewport dinámico de iOS */
-  overflow: hidden; /* Prohibimos que el body scrollee */
-  position: fixed;
-  inset: 0;
+/* ── SOLUCIÓN DEFINITIVA CORTE NEGRO Y SCROLL NATIVO ── */
+html {
+  background-color: #0a0e17; /* Se funde directo con el notch */
+  min-height: 100vh;
 }
 
 body {
+  background-color: transparent;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  /* NO poner overflow: hidden. Dejamos que el body haga scroll natural */
 }
 
-/* ── FONDO DEGRADADO EN CAPA SEPARADA ── */
+/* ── CAPA DE FONDO FIJA ── */
 .bg-layer {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  position: fixed; /* Se queda quieta mientras haces scroll */
+  top: -50px; left: -50px; right: -50px; bottom: -50px; /* Expansión extra para cubrir bordes */
   background: linear-gradient(135deg, #0a0e17, #120d1c, #040a12);
-  z-index: 0;
+  z-index: -2;
   pointer-events: none;
 }
 
 .syne-font { font-family: 'Syne', sans-serif; }
 
-/* ── ILUMINACIÓN FLOTANTE (CRISTAL VIVO) ── */
+/* ── ILUMINACIÓN FLOTANTE ── */
 @keyframes float1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(30px, 40px) scale(1.1); }
@@ -92,35 +92,31 @@ body {
 }
 
 .bg-orb {
-  position: absolute; 
+  position: fixed; 
   border-radius: var(--radius-circle); 
   filter: blur(90px);
   opacity: 0.35; 
   pointer-events: none; 
-  z-index: 1;
+  z-index: -1;
 }
 .orb-1 { top: -50px; left: -80px; width: 450px; height: 450px; background: var(--green); animation: float1 18s ease-in-out infinite; }
 .orb-2 { bottom: 5%; right: -10%; width: 340px; height: 340px; background: var(--blue); animation: float2 22s ease-in-out infinite; }
 .orb-3 { top: 35%; left: -20%; width: 300px; height: 300px; background: var(--purple); opacity: 0.25; animation: float3 25s ease-in-out infinite; }
 
-/* ── CONTENEDOR MÓVIL (Aquí es donde ocurre el scroll) ── */
+/* ── CONTENEDOR PRINCIPAL ── */
 .app-container { 
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch; 
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
   
-  /* Ajuste preciso para la isla dinámica usando variables de entorno de iOS */
-  padding-top: calc(env(safe-area-inset-top, 45px) + 16px);
+  /* Ajuste preciso para la isla dinámica usando variables de entorno */
+  padding-top: max(50px, calc(env(safe-area-inset-top) + 16px));
   padding-left: 16px;
   padding-right: 16px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 100px);
-  z-index: 2;
-  
-  /* Centrado en pantallas más grandes */
-  margin: 0 auto;
-  max-width: 480px;
+  /* Margen gigante abajo para que el historial nunca quede oculto por el Dock */
+  padding-bottom: 160px;
+  position: relative;
+  z-index: 1;
 }
 
 header {
@@ -153,11 +149,11 @@ header {
 }
 
 .privacy-btn {
-  background: rgba(255, 255, 255, 0.05); 
+  background: rgba(255, 255, 255, 0.08); 
   border: 1px solid var(--glass-border);
   border-top: 1px solid var(--glass-highlight);
-  backdrop-filter: blur(40px) saturate(180%); 
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(30px); 
+  -webkit-backdrop-filter: blur(30px);
   width: 36px; 
   height: 36px; 
   border-radius: 50%;
@@ -175,11 +171,11 @@ header {
   font-size: 12px; 
   font-weight: 800; 
   color: var(--text);
-  background: rgba(255, 255, 255, 0.05); 
+  background: rgba(255, 255, 255, 0.08); 
   border: 1px solid var(--glass-border);
   border-top: 1px solid var(--glass-highlight);
-  backdrop-filter: blur(40px) saturate(180%); 
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(30px); 
+  -webkit-backdrop-filter: blur(30px);
   border-radius: var(--radius-pill); 
   padding: 8px 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1);
@@ -191,11 +187,11 @@ header {
 .privacy-mode canvas { filter: blur(14px); opacity: 0.5; pointer-events: none; }
 .sensitive { transition: filter 0.4s ease, opacity 0.4s ease; }
 
-/* ── PANELES DE CRISTAL LÍQUIDO (APPLE STYLE) ── */
+/* ── PANELES DE CRISTAL LÍQUIDO PREMIUM (Sin Saturate) ── */
 .glass-panel {
-  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
-  backdrop-filter: blur(40px) saturate(180%); 
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+  backdrop-filter: blur(30px); 
+  -webkit-backdrop-filter: blur(30px);
   border: 1px solid var(--glass-border);
   border-top: 1px solid var(--glass-highlight); 
   border-left: 1px solid var(--glass-highlight);
@@ -204,13 +200,14 @@ header {
   position: relative;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform, opacity;
 }
 
 /* ── BURBUJA FLOTANTE (MODAL) PERFECTA ── */
 #bubbleOverlay {
   position: fixed; inset: 0; z-index: 99999;
-  background: rgba(0,0,0,0.4); 
-  backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%);
+  background: rgba(0,0,0,0.5); 
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none; 
   transition: opacity 0.4s var(--spring-smooth);
@@ -218,14 +215,14 @@ header {
 #bubbleOverlay.show { opacity: 1; pointer-events: auto; }
 
 .bubble-card {
-  background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+  background: linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
   border: 1px solid var(--glass-border); 
   border-top: 1px solid var(--glass-highlight);
   border-left: 1px solid var(--glass-highlight);
-  backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
   border-radius: var(--radius-card); padding: 36px 24px;
   width: 85%; max-width: 360px; text-align: center;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 2px 10px rgba(255,255,255,0.2);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 2px 10px rgba(255,255,255,0.2);
   transform: scale(0.8) translate3d(0, 40px, 0);
   transition: transform 0.5s var(--spring-bouncy);
 }
@@ -256,19 +253,19 @@ header {
 /* ── PANELES DE CUENTAS (BILLETERA / BANCO) ── */
 #accountsOverlay {
   position: fixed; inset: 0; z-index: 90000;
-  background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
   opacity: 0; pointer-events: none; transition: opacity 0.4s var(--spring-smooth);
 }
 #accountsOverlay.show { opacity: 1; pointer-events: auto; }
 
 .accounts-sheet {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 90001;
-  background: linear-gradient(180deg, rgba(20,20,30,0.85) 0%, rgba(10,10,15,0.95) 100%);
-  backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+  background: linear-gradient(180deg, rgba(20,20,30,0.95) 0%, rgba(10,10,15,0.98) 100%);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
   border-top: 1px solid var(--glass-highlight);
   border-radius: 36px 36px 0 0; padding: 24px 24px env(safe-area-inset-bottom, 24px);
   transform: translate3d(0, 100%, 0); transition: transform 0.6s var(--spring-bouncy);
-  box-shadow: 0 -20px 60px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.1);
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.1);
 }
 .accounts-sheet.show { transform: translate3d(0, 0, 0); }
 
@@ -291,11 +288,11 @@ header {
   padding: 0 12px; padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .nav-dock {
-  background: rgba(255, 255, 255, 0.05); 
-  backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
+  background: rgba(255, 255, 255, 0.08); 
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
   border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
   border-radius: var(--radius-pill);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.15);
   display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px;
   width: 100%; max-width: 480px; padding: 6px;
 }
@@ -318,7 +315,7 @@ header {
 
 /* ── ANIMACIÓN DE PÁGINAS ── */
 .page { display:none; opacity:0; }
-.page.active { display:block; animation: pageAppear 0.4s ease-out forwards; }
+.page.active { display:block; animation: pageAppear 0.3s ease-out forwards; }
 @keyframes pageAppear {
   0% { opacity: 0; transform: translate3d(0, 15px, 0); }
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -443,13 +440,13 @@ input::placeholder { color: rgba(255,255,255,0.25); font-size: 16px;}
 }
 .clear-btn {
   font-size:12px; font-weight:800; color:var(--text-muted); 
-  background: rgba(255,255,255,0.05); backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
   border:1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
   border-radius:var(--radius-pill); padding:10px 18px;
   cursor:pointer; transition:transform 0.2s var(--press-effect);
   box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
 }
-.clear-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
+.clear-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.15); }
 
 .tx-list { display:flex; flex-direction:column; gap:14px; }
 
@@ -514,7 +511,7 @@ canvas { width: 100% !important; max-height: 260px; }
 .calc-screen { font-family: 'DM Sans', sans-serif !important; font-size: 48px; font-weight: 800; color: #fff; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height:1;}
 .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .calc-btn {
-  background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
+  background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
   border-radius: var(--radius-circle); padding: 0; aspect-ratio: 1/1; 
   color: #fff; font-size: 26px; font-weight: 800;
   cursor: pointer; transition: transform 0.2s var(--press-effect); display: flex; justify-content: center; align-items: center;
@@ -528,7 +525,7 @@ canvas { width: 100% !important; max-height: 260px; }
 /* ── TOAST ── */
 .toast {
   position:fixed; top:30px; left:50%; transform:translate3d(-50%, -100px, 0) scale(0.9);
-  background:rgba(25,25,35,0.98); backdrop-filter:blur(30px) saturate(200%); border:1px solid var(--glass-border);
+  background:rgba(25,25,35,0.98); backdrop-filter:blur(30px); border:1px solid var(--glass-border);
   border-radius:var(--radius-pill); padding:16px 30px; font-size:15px; font-weight:800;
   box-shadow:0 16px 40px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.15); z-index:9999; 
   transition:all 0.4s var(--spring-bouncy); white-space:nowrap; opacity:0;
@@ -915,7 +912,7 @@ function togglePrivacy() {
   } else {
     document.body.classList.remove('privacy-mode');
     btn.textContent = '👁️';
-    btn.style.background = 'rgba(255, 255, 255, 0.05)';
+    btn.style.background = 'rgba(255, 255, 255, 0.08)';
     btn.style.borderColor = 'var(--glass-border)';
   }
 }
@@ -993,6 +990,10 @@ function animateValue(elId, newVal) {
 // ── NAVEGACIÓN DOCK ──
 function showPage(page, tabElement) {
   currentPage = page;
+  
+  // Scrollear siempre arriba al cambiar de pestaña para evitar desorientación
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
   document.querySelectorAll('.page').forEach(p => {
     p.classList.remove('active');
     if (p.id === 'page' + page.charAt(0).toUpperCase() + page.slice(1)) {
