@@ -50,52 +50,32 @@
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-/* ── Fondo Inmersivo y Bloqueo de Descuadre Horizontal ── */
-html {
+/* ── BLOQUEO TOTAL DE DESPLAZAMIENTO DEL SISTEMA ── */
+html, body {
   background-color: var(--bg-color);
   width: 100%;
-  max-width: 100vw;
-  height: 100%;
-  overflow-x: hidden; /* Evita estrictamente que la página se mueva a los lados */
+  height: 100%; /* Forzamos a la pantalla a medir exactamente 100% */
+  overflow: hidden; /* Prohibimos que la página entera haga scroll y ensucie la zona de arriba */
 }
 
 body {
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  width: 100%; 
-  max-width: 100vw;
-  min-height: 100dvh; 
-  overflow-x: hidden; /* Blindaje secundario contra descuadre */
-  overscroll-behavior-y: none;
-  -webkit-font-smoothing: antialiased;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   position: relative;
   margin: 0;
   background-color: transparent; 
 }
 
-/* Capa Base Infinita */
+/* ── Capa Base Infinita ── */
 .bg-layer {
   position: fixed; 
   top: -25vh; left: -25vw; 
   width: 150vw; height: 150vh;
   background: linear-gradient(135deg, #08080f, #120d1c, #040a12);
   z-index: -3;
-}
-
-/* ── Efecto de Desenfoque Superior (Isla Dinámica) ── */
-.top-notch-blur {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: max(75px, calc(env(safe-area-inset-top) + 25px));
-  background: linear-gradient(to bottom, rgba(8,8,15,0.95) 0%, rgba(8,8,15,0.4) 60%, rgba(8,8,15,0) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  z-index: 998;
-  pointer-events: none; /* Crucial: permite tocar los botones que están debajo */
-  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
 .syne-font { font-family: 'Syne', sans-serif; }
@@ -126,15 +106,29 @@ body {
 .orb-2 { bottom: 5%; right: -10%; width: 340px; height: 340px; background: var(--blue); animation: float2 22s ease-in-out infinite; }
 .orb-3 { top: 35%; left: -20%; width: 300px; height: 300px; background: var(--purple); opacity: 0.25; animation: float3 25s ease-in-out infinite; }
 
-/* ── Contenedor Principal ── */
+/* ── TECHO INVISIBLE DE LA ISLA DINÁMICA ── */
+.status-bar-spacer {
+  width: 100%;
+  height: max(54px, env(safe-area-inset-top)); /* Espacio exacto para proteger la barra de estado de iOS */
+  flex-shrink: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── Contenedor Principal (ESTE ES EL QUE HACE SCROLL AHORA) ── */
 .app-container { 
-  position: relative; 
-  z-index: 1; 
+  flex: 1; /* Ocupa el resto de la pantalla debajo del techo invisible */
   width: 100%; 
   max-width: 480px; 
-  /* Ajuste de padding para que respire por debajo del nuevo desenfoque */
-  padding: max(70px, calc(env(safe-area-inset-top) + 20px)) max(16px, env(safe-area-inset-right)) max(120px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  overflow-y: auto; /* Permite el scroll interno */
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* Scroll suave de iOS */
+  padding: 10px 16px 120px 16px;
+  position: relative;
+  z-index: 1;
+  /* Máscara de disolución: Hace que los elementos desaparezcan suavemente al llegar al techo */
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15px, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15px, black 100%);
 }
 
 header {
@@ -537,14 +531,14 @@ canvas { width: 100% !important; max-height: 260px; }
 </head>
 <body>
 
+<!-- Fondo fijo e inamovible con las luces cristalinas -->
 <div class="bg-layer"></div>
-
 <div class="bg-orb orb-1"></div>
 <div class="bg-orb orb-2"></div>
 <div class="bg-orb orb-3"></div> <!-- Nueva esfera de luz morada -->
 
-<!-- Barra de desenfoque de la Isla Dinámica -->
-<div class="top-notch-blur"></div>
+<!-- Este es el "Bloqueador Invisible" superior donde el contenido choca y desaparece -->
+<div class="status-bar-spacer"></div>
 
 <div id="bubbleOverlay" onclick="closeBubble()">
   <div class="bubble-card" onclick="event.stopPropagation()">
@@ -586,6 +580,7 @@ canvas { width: 100% !important; max-height: 260px; }
   </div>
 </div>
 
+<!-- EL CONTENEDOR MÓVIL: A partir de aquí todo se desliza -->
 <div class="app-container">
 
   <header>
